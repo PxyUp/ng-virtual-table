@@ -1,0 +1,8 @@
+<div class="table">
+  <div class="header">
+    <div *ngFor="let headerItem of column">{{ headerItem }}</div>
+  </div>
+  <cdk-virtual-scroll-viewport itemSize="itemCount">
+    <div *cdkVirtualFor="let item of _dataStream | async">{{item}}</div>
+  </cdk-virtual-scroll-viewport>
+</div>

@@ -7,7 +7,9 @@
   "author": "Iurii Panarin <iurii.panarin@mcmakler.de>",
   "license": "MIT",
   "scripts": {
-    "build": "ng-packagr -p package.json"
+    "build": "ng-packagr -p package.json",
+    "ct": "git-cz",
+    "commitmsg": "commitlint -E GIT_PARAMS"
   },
   "ngPackage": {
     "lib": {
@@ -30,8 +32,27 @@
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
+    "@commitlint/config-conventional": "^7.1.2",
+    "git-cz": "^1.7.1",
     "ng-packagr": "^4.3.1",
     "tsickle": "^0.33.0",
     "typescript": "^3.1.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "header-max-length": [
+        2,
+        "always",
+        80
+      ]
+    }
   }
 }

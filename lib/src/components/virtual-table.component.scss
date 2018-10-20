@@ -1,0 +1,28 @@
+.table {
+  .header {
+    display: flex;
+    margin-top: 8px;
+    &-item {
+      cursor: pointer;
+      margin: 0 8px 0 8px;
+    }
+    border-bottom: 1px solid black;
+  }
+  .virtual-table {
+    &-content {
+      display: flex;
+      flex-direction: column;
+      min-height: 200px;
+    }
+    &-row {
+      display: flex;
+      flex-direction: row;
+      min-height: 20px;
+      margin: 8px 0 8px 0;
+    }
+    &-column {
+      display: flex;
+      margin: 0 8px 0 8px;
+    }
+  }
+}

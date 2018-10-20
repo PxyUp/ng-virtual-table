@@ -45,6 +45,8 @@ export class VirtualTableComponent {
 
   private _destroyed$ = new Subject<void>();
 
+  private _headerWasSet = false;
+
   private filter$ = this.filterControl.valueChanges.pipe(
     debounceTime(300),
     startWith(null),
@@ -55,7 +57,10 @@ export class VirtualTableComponent {
   applySort(column: string) {
     this.column = this.column.map((item) => {
       if (item.name !== column) {
-        return item;
+        return {
+          ...item,
+          sort: null,
+        };
       }
 
       if (item.sort === null) {
@@ -83,6 +88,11 @@ export class VirtualTableComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    if ('headerColumn' in changes && Array.isArray(changes.headerColumn.currentValue)) {
+      this.column = this.createColumnFromArray(changes.headerColumn.currentValue);
+      this._headerWasSet = true;
+    }
+
     if ('dataSource' in changes) {
       const newDataSource = changes.dataSource.currentValue as Observable<Array<VirtualTableItem>>;
       this._dataStream = combineLatest(
@@ -90,9 +100,12 @@ export class VirtualTableComponent {
         combineLatest(
           newDataSource.pipe(
             tap((stream: Array<VirtualTableItem>) => {
-              this._headerColumn.clear();
-              stream.forEach((e) => Object.keys(e).forEach((key) => this._headerColumn.add(key)));
-              this.column = this.createColumnFromArray(Array.from(this._headerColumn));
+              if (!this._headerWasSet) {
+                this._headerColumn.clear();
+                stream.forEach((e) => Object.keys(e).forEach((key) => this._headerColumn.add(key)));
+                this.column = this.createColumnFromArray(Array.from(this._headerColumn));
+                this._headerWasSet = true;
+              }
             }),
             map((stream) => stream.slice()),
           ),
@@ -115,7 +128,7 @@ export class VirtualTableComponent {
         ),
       ).pipe(
         map(([sort, stream]) => {
-          const sliceStream = stream.slice() as Array<VirtualTableItem>;
+          const sliceStream = stream.slice();
 
           const sortColumn = this.column.find((e) => e.name === sort);
 
@@ -147,10 +160,6 @@ export class VirtualTableComponent {
         }),
         tap((value) => console.log(value)),
       );
-    }
-
-    if ('headerColumn' in changes && Array.isArray(changes.headerColumn.currentValue)) {
-      this.column = this.createColumnFromArray(changes.headerColumn.currentValue);
     }
   }
 

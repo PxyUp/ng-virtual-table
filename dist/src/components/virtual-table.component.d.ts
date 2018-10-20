@@ -18,11 +18,11 @@ export declare class VirtualTableComponent {
     _dataStream: Observable<Array<VirtualTableItem>>;
     private sort$;
     private _destroyed$;
+    private _headerWasSet;
     private filter$;
     applySort(column: string): void;
     ngOnChanges(changes: SimpleChanges): void;
     createColumnFromArray(arr: Array<string>): Array<VirtualTableColumn>;
     ngOnDestroy(): void;
-    trackBy(item: VirtualTableItem): any;
 }
 export {};

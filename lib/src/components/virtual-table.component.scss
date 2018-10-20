@@ -9,7 +9,8 @@
     border-bottom: 1px solid black;
   }
   .virtual-table {
-    &-content {
+    &-content,
+    &-empty {
       display: flex;
       flex-direction: column;
       min-height: 200px;

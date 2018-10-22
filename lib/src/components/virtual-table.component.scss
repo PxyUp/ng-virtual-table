@@ -1,26 +1,44 @@
+$header-height: 40px;
+
+:host {
+  display: block;
+  position: relative;
+}
+
 .table {
+  height: 100%;
+  position: relative;
+
   .header {
     display: flex;
     margin-top: 8px;
+    height: $header-height;
+    align-items: center;
+
     &-item {
       cursor: pointer;
       margin: 0 8px 0 8px;
     }
+
     border-bottom: 1px solid black;
   }
+
   .virtual-table {
+
     &-content,
     &-empty {
       display: flex;
       flex-direction: column;
-      min-height: 200px;
+      height: calc(100% - #{$header-height});
     }
+
     &-row {
       display: flex;
       flex-direction: row;
       min-height: 20px;
       margin: 8px 0 8px 0;
     }
+
     &-column {
       display: flex;
       margin: 0 8px 0 8px;

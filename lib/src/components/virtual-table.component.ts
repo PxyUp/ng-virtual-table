@@ -27,7 +27,7 @@ interface VirtualTableColumn {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtualTableComponent {
-  @Input() itemCount = 50;
+  @Input() itemCount = 1;
 
   @Input() dataSource: Observable<Array<VirtualTableItem>>;
 

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "baseUrl": ".",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -8,6 +9,11 @@
     "experimentalDecorators": true,
     "lib": ["es2015", "dom"],
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "paths": {
+      "@angular/*": [
+        "./node_modules/@angular/*"
+      ]
+    }
   }
 }

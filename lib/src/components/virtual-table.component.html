@@ -12,7 +12,7 @@
     <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemCount">
       <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
         <div *ngFor="let headerItem of column" class="virtual-table-column">{{
-          item[headerItem.name] }}</div>
+          getElement(item, headerItem.func) }}</div>
       </div>
     </cdk-virtual-scroll-viewport>
     <ng-template #emptyContainer>

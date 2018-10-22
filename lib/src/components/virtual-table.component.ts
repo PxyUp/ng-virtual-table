@@ -126,7 +126,7 @@ export class VirtualTableComponent {
           }),
         ),
       ).pipe(
-        debounceTime(50),
+        debounceTime(100),
         map(([sort, filterString, stream]) => {
           const sliceStream = stream.slice();
 
@@ -143,22 +143,19 @@ export class VirtualTableComponent {
           const _sortColumn = this._headerDict[sort];
 
           if (sortColumn.sort === 'asc') {
-            sliceStream.sort(
-              (a: VirtualTableItem, b: VirtualTableItem) =>
-                this.getElement(a, _sortColumn.func) > this.getElement(b, _sortColumn.func)
-                  ? 1
-                  : this.getElement(a, _sortColumn.func) === this.getElement(b, _sortColumn.func)
-                    ? 0
-                    : -1,
+            sliceStream.sort((a, b) =>
+              sortColumn.comp(
+                this.getElement(a, _sortColumn.func),
+                this.getElement(b, _sortColumn.func),
+              ),
             );
           } else {
             sliceStream.sort(
-              (a: VirtualTableItem, b: VirtualTableItem) =>
-                this.getElement(a, _sortColumn.func) < this.getElement(b, _sortColumn.func)
-                  ? 1
-                  : this.getElement(a, _sortColumn.func) === this.getElement(b, _sortColumn.func)
-                    ? 0
-                    : -1,
+              (a, b) =>
+                -sortColumn.comp(
+                  this.getElement(a, _sortColumn.func),
+                  this.getElement(b, _sortColumn.func),
+                ),
             );
           }
 
@@ -177,7 +174,6 @@ export class VirtualTableComponent {
                 this.getElement(item, e.func).toString().toLocaleLowerCase().indexOf(filter) > -1,
             ),
           );
-          console.log(filterSliceStream);
           return filterSliceStream;
         }),
         publishBehavior([]),
@@ -206,7 +202,7 @@ export class VirtualTableComponent {
     return columnArr;
   }
 
-  private getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
+  public getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
     return func.call(this, item);
   }
 
@@ -216,6 +212,7 @@ export class VirtualTableComponent {
         name: item,
         key: item,
         func: (e) => e[item],
+        comp: this.defaultComparator,
         sort: null,
       };
     }
@@ -226,6 +223,7 @@ export class VirtualTableComponent {
       name: item.name || item.key,
       key: item.key,
       func: typeof item.func === 'function' ? item.func : (e) => e[item.key],
+      comp: typeof item.comp === 'function' ? item.comp : this.defaultComparator,
       sort: item.sort || null,
     };
   }
@@ -236,6 +234,16 @@ export class VirtualTableComponent {
 
   clickItem(item: VirtualTableItem) {
     if (typeof this.onRowClick === 'function') this.onRowClick(item);
+  }
+
+  private defaultComparator(a: any, b: any): number {
+    if (a > b) {
+      return 1;
+    }
+    if (a < b) {
+      return -1;
+    }
+    return 0;
   }
 
   toggleFilter() {

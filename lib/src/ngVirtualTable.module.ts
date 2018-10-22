@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScrollDispatchModule } from '@angular/cdk/scrolling';
 import { VirtualTableComponent } from './components/virtual-table.component';
@@ -19,4 +19,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   exports: [VirtualTableComponent],
   providers: [],
 })
-export class NgVirtualTableModule {}
+export class NgVirtualTableModule {
+  public static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: NgVirtualTableModule,
+    };
+  }
+}

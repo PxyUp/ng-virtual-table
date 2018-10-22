@@ -1,4 +1,8 @@
-##
+## ng-virtual-table
+
+Angular 7 virtual scroll table with support filtering, sorting, and custom config column
+
+[![NPM](https://nodei.co/npm/ng-virtual-table.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ng-virtual-table/)
 
 # Example
 

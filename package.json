@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^7.1.2",
-    "git-cz": "^1.7.1",
+    "commitizen": "^3.0.4",
     "ng-packagr": "^4.3.1",
     "rxjs": "^6.3.3",
     "scss-bundle": "^2.4.0",

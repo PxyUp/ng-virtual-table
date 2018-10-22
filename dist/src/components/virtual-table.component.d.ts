@@ -1,32 +1,31 @@
-import { SimpleChanges } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { SimpleChanges, ElementRef } from '@angular/core';
+import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
-interface VirtualTableItem {
-    [key: string]: any;
-}
-interface VirtualTableColumn {
-    name: string;
-    sort: 'asc' | 'desc' | null;
-}
+import { VirtualTableConfig, VirtualTableItem, VirtualTableColumn } from '../interfaces';
 export declare class VirtualTableComponent {
     itemCount: number;
+    private _config;
+    filterIsOpen: boolean;
+    inputFilterFocus: ElementRef;
     dataSource: Observable<Array<VirtualTableItem>>;
-    headerColumn: Array<string>;
+    filterPlaceholder: string;
+    config: VirtualTableConfig;
     onRowClick: (item: VirtualTableItem) => void;
     filterControl: FormControl;
-    private _headerColumn;
+    private _headerDict;
     column: Array<VirtualTableColumn>;
     _dataStream: Observable<Array<VirtualTableItem>>;
     private sort$;
     private _destroyed$;
     private _headerWasSet;
-    empty$: BehaviorSubject<boolean>;
+    isEmptySubject$: Observable<boolean>;
     private filter$;
     applySort(column: string): void;
     ngOnChanges(changes: SimpleChanges): void;
-    createColumnFromArray(arr: Array<string>): Array<VirtualTableColumn>;
+    createColumnFromArray(arr: Array<VirtualTableColumn | string>): Array<VirtualTableColumn>;
+    private getElement;
+    private createColumnFromString;
     ngOnDestroy(): void;
     clickItem(item: VirtualTableItem): void;
-    readonly isEmptySubject$: Observable<boolean>;
+    toggleFilter(): void;
 }
-export {};

@@ -6,10 +6,15 @@
 }
 
 $header-height: 40px;
+$padding-left: 16px;
 
 :host {
   display: block;
   position: relative;
+
+  mat-icon::ng-deep {
+    font-family: 'Material Icons';
+  }
 }
 
 .table {
@@ -21,12 +26,48 @@ $header-height: 40px;
     margin-top: 8px;
     height: $header-height;
     align-items: center;
+    justify-content: space-between;
+
+    .filter-spot {
+      display: flex;
+      align-items: center;
+      right: 0;
+      width: 15px;
+      min-width: 15px;
+      height: 100%;
+      position: relative;
+
+      .filter-spot-input {
+        display: none;
+      }
+
+      mat-icon {
+        cursor: pointer;
+        margin-top: 9px;
+      }
+
+      &.open {
+        mat-icon {
+          z-index: 1;
+
+        }
+
+        .filter-spot-input {
+          display: block;
+          position: absolute;
+          right: 0;
+        }
+      }
+
+    }
 
     &-item {
       cursor: pointer;
       display: flex;
       align-items: center;
-      margin: 0 8px 0 8px;
+      width: 100%;
+      height: 100%;
+      padding-left: $padding-left;
 
       &.asc {
         &:after {
@@ -50,6 +91,13 @@ $header-height: 40px;
 
   .virtual-table {
 
+    &-content {
+      cdk-virtual-scroll-viewport::ng-deep {
+        height: 100%;
+        width: 100%;
+      }
+    }
+
     &-content,
     &-empty {
       display: flex;
@@ -61,12 +109,17 @@ $header-height: 40px;
       display: flex;
       flex-direction: row;
       min-height: 20px;
-      margin: 8px 0 8px 0;
+      justify-content: space-between;
+      align-items: center;
+
     }
 
     &-column {
       display: flex;
-      margin: 0 8px 0 8px;
+      width: 100%;
+      padding-left: $padding-left;
+      height: 100%;
+      align-items: center;
     }
   }
 }

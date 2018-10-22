@@ -1,17 +1,22 @@
 <div class="table">
   <div class="header">
-    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.name)" [ngClass]="headerItem.sort">{{
+    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.key)" [ngClass]="headerItem.sort">{{
       headerItem.name
       }}</div>
-    <input type="text" [formControl]="filterControl">
-  </div>
-  <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemCount" class="virtual-table-content">
-    <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
-      <div *ngFor="let headerItem of column" class="virtual-table-column">{{
-        item[headerItem.name] }}</div>
+    <div class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">
+      <input #inputFilterFocus class="filter-spot-input" matInput [placeholder]="filterPlaceholder" [formControl]="filterControl">
+      <mat-icon (click)="toggleFilter()">{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>
     </div>
-  </cdk-virtual-scroll-viewport>
-  <ng-template #emptyContainer>
-    Data is empty
-  </ng-template>
+  </div>
+  <div class="virtual-table-content">
+    <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemCount">
+      <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
+        <div *ngFor="let headerItem of column" class="virtual-table-column">{{
+          item[headerItem.name] }}</div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+    <ng-template #emptyContainer>
+      Data is empty
+    </ng-template>
+  </div>
 </div>

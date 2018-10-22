@@ -9,17 +9,15 @@
   "scripts": {
     "build": "ng-packagr -p package.json",
     "ct": "git add --all && git-cz",
-    "commitmsg": "commitlint -E GIT_PARAMS"
+    "commitmsg": "commitlint -E GIT_PARAMS",
+    "prepublish": "build"
   },
   "ngPackage": {
     "lib": {
       "entryFile": "./lib/public_api.ts"
     },
     "cssUrl": "inline",
-    "whitelistedNonPeerDependencies": [
-      "angular",
-      "rxjs"
-    ]
+    "whitelistedNonPeerDependencies": ["angular", "rxjs"]
   },
   "peerDependencies": {
     "@angular/animations": "^7.0.0",
@@ -59,15 +57,9 @@
     }
   },
   "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
+    "extends": ["@commitlint/config-conventional"],
     "rules": {
-      "header-max-length": [
-        2,
-        "always",
-        80
-      ]
+      "header-max-length": [2, "always", 80]
     }
   }
 }

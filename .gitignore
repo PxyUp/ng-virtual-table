@@ -4,11 +4,11 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-appTest/**/*.*
-appTest/src/**/*.*
+dist
+appTest/scr/**/*.*
+!appTest/dist/**/*.*
 !appTest/.gitignore
-
+appTest
 # Runtime data
 pids
 *.pid
@@ -63,5 +63,3 @@ typings/
 
 # next.js build output
 .next
-
-appTest

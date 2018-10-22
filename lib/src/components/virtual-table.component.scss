@@ -69,6 +69,10 @@ $row-height: 20px;
       height: 100%;
       padding-left: $padding-left;
 
+      &.not-clickable {
+        cursor: default;
+      }
+
       &.asc {
         &:after {
           margin-right: 4px;
@@ -110,6 +114,7 @@ $row-height: 20px;
       min-height: $row-height;
       justify-content: space-between;
       align-items: center;
+      cursor: pointer;
     }
 
     &-column {

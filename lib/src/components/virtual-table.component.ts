@@ -6,19 +6,14 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest, of, BehaviorSubject } from 'rxjs';
+import { Observable, EMPTY, Subject, combineLatest } from 'rxjs';
 import {
   tap,
   map,
   startWith,
   debounceTime,
-  filter,
   distinctUntilChanged,
   takeUntil,
-  catchError,
-  share,
-  shareReplay,
-  switchMap,
   publishBehavior,
   refCount,
 } from 'rxjs/operators';
@@ -76,7 +71,14 @@ export class VirtualTableComponent {
       if (item.key !== column) {
         return {
           ...item,
-          sort: null,
+          sort: item.sort === false ? false : null,
+        };
+      }
+
+      if (item.sort === false) {
+        return {
+          ...item,
+          sort: false,
         };
       }
 
@@ -113,8 +115,6 @@ export class VirtualTableComponent {
     if ('dataSource' in changes) {
       const newDataSource = changes.dataSource.currentValue as Observable<Array<VirtualTableItem>>;
       this._dataStream = combineLatest(
-        this.sort$.asObservable().pipe(startWith(null)),
-        this.filter$,
         newDataSource.pipe(
           tap((stream: Array<VirtualTableItem>) => {
             if (!this._headerWasSet) {
@@ -125,9 +125,11 @@ export class VirtualTableComponent {
             }
           }),
         ),
+        this.sort$.asObservable().pipe(startWith(this._sortAfterConfigWasSet())),
+        this.filter$,
       ).pipe(
         debounceTime(100),
-        map(([sort, filterString, stream]) => {
+        map(([stream, sort, filterString]) => {
           const sliceStream = stream.slice();
 
           const sortColumn = this.column.find((e) => e.key === sort);
@@ -184,6 +186,14 @@ export class VirtualTableComponent {
     }
   }
 
+  private _sortAfterConfigWasSet() {
+    const columnPreSort = this.column.find((e) => e.sort && e.sort !== null);
+    if (columnPreSort) {
+      return columnPreSort.key;
+    }
+    return null;
+  }
+
   createColumnFromArray(arr: Array<VirtualTableColumn | string>): Array<VirtualTableColumn> {
     if (!arr || arr.length === 0) {
       return;
@@ -199,6 +209,7 @@ export class VirtualTableComponent {
 
       return columnItem;
     });
+
     return columnArr;
   }
 
@@ -224,7 +235,7 @@ export class VirtualTableComponent {
       key: item.key,
       func: typeof item.func === 'function' ? item.func : (e) => e[item.key],
       comp: typeof item.comp === 'function' ? item.comp : this.defaultComparator,
-      sort: item.sort || null,
+      sort: item.sort === false || item.sort ? item.sort : null,
     };
   }
 

@@ -1,6 +1,6 @@
 <div class="table">
   <div class="header">
-    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.key)" [ngClass]="headerItem.sort">{{
+    <div *ngFor="let headerItem of column" class="header-item" [ngClass]="headerItem.sort === false ?  'not-clickable' : headerItem.sort ? headerItem.sort : ''" (click)="headerItem.sort !== false && applySort(headerItem.key)">{{
       headerItem.name
       }}</div>
     <div class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">

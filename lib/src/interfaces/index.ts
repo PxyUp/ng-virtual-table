@@ -7,7 +7,7 @@ export interface VirtualTableColumn {
   key: string;
   func?: (item: VirtualTableItem) => any;
   comp?: (a: any, b: any) => number;
-  sort?: 'asc' | 'desc' | null;
+  sort?: 'asc' | 'desc' | null | false;
 }
 
 export interface VirtualTableConfig {

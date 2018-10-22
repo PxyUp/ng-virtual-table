@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Input, SimpleChanges } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest, of } from 'rxjs';
+import { Observable, EMPTY, Subject, combineLatest, of, BehaviorSubject } from 'rxjs';
 import {
   tap,
   map,
@@ -48,6 +48,8 @@ export class VirtualTableComponent {
   private _destroyed$ = new Subject<void>();
 
   private _headerWasSet = false;
+
+  public empty$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   private filter$ = this.filterControl.valueChanges.pipe(
     debounceTime(300),
@@ -129,6 +131,14 @@ export class VirtualTableComponent {
           }),
         ),
       ).pipe(
+        tap(([sort, stream]) => {
+          console.log(stream);
+          if (stream.length > 0) {
+            this.empty$.next(false);
+            return;
+          }
+          this.empty$.next(true);
+        }),
         map(([sort, stream]) => {
           const sliceStream = stream.slice();
 
@@ -160,7 +170,6 @@ export class VirtualTableComponent {
 
           return sliceStream;
         }),
-        tap((value) => console.log(value)),
       );
     }
   }
@@ -175,5 +184,9 @@ export class VirtualTableComponent {
 
   clickItem(item: VirtualTableItem) {
     if (typeof this.onRowClick === 'function') this.onRowClick(item);
+  }
+
+  get isEmptySubject$() {
+    return this.empty$.asObservable();
   }
 }

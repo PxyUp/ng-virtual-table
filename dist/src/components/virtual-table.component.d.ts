@@ -1,5 +1,5 @@
 import { SimpleChanges } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 interface VirtualTableItem {
     [key: string]: any;
@@ -20,11 +20,13 @@ export declare class VirtualTableComponent {
     private sort$;
     private _destroyed$;
     private _headerWasSet;
+    empty$: BehaviorSubject<boolean>;
     private filter$;
     applySort(column: string): void;
     ngOnChanges(changes: SimpleChanges): void;
     createColumnFromArray(arr: Array<string>): Array<VirtualTableColumn>;
     ngOnDestroy(): void;
     clickItem(item: VirtualTableItem): void;
+    readonly isEmptySubject$: Observable<boolean>;
 }
 export {};

@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+}
+
 $header-height: 40px;
 
 :host {
@@ -17,7 +24,25 @@ $header-height: 40px;
 
     &-item {
       cursor: pointer;
+      display: flex;
+      align-items: center;
       margin: 0 8px 0 8px;
+
+      &.asc {
+        &:after {
+          margin-right: 4px;
+          content: 'arrow_downward';
+          font-family: 'Material Icons',
+        }
+      }
+
+      &.desc {
+        &:after {
+          margin-right: 4px;
+          font-family: 'Material Icons';
+          content: 'arrow_upward';
+        }
+      }
     }
 
     border-bottom: 1px solid black;

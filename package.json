@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "build": "ng-packagr -p package.json",
-    "ct": "git-cz",
+    "ct": "git add --all && git-cz",
     "commitmsg": "commitlint -E GIT_PARAMS"
   },
   "ngPackage": {

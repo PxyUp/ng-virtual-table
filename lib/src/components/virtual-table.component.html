@@ -1,7 +1,8 @@
 <div class="table">
   <div class="header">
-    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.name)">{{ headerItem.name
-      }} {{ headerItem.sort }}</div>
+    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.name)" [ngClass]="headerItem.sort">{{
+      headerItem.name
+      }}</div>
     <input type="text" [formControl]="filterControl">
   </div>
   <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemCount" class="virtual-table-content">

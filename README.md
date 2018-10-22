@@ -51,4 +51,4 @@ dataSource = of(
 <ng-virtual-table [dataSource]="dataSource1" [config]="config"></ng-virtual-table>
 ```
 
-📺 [Demo](https://pxyup.github.io/ng-virtual-table/index.html)
+📺 [Demo](https://pxyup.github.io/ng-virtual-table)

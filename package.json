@@ -1,7 +1,7 @@
 {
   "name": "ng-virtual-table",
   "version": "1.0.0",
-  "description": "Virtual table for angular v7+",
+  "description": "Virtual table for angular 7+. Support filtering, sorting, custom config",
   "main": "index.js",
   "repository": "git@github.com:PxyUp/ng-virtual-table.git",
   "author": "Iurii Panarin <iurii.panarin@mcmakler.de>",
@@ -61,5 +61,6 @@
     "rules": {
       "header-max-length": [2, "always", 80]
     }
-  }
+  },
+  "keywords": ["virtual scroll", "scroll", "ngx", "angular", "angular 7"]
 }

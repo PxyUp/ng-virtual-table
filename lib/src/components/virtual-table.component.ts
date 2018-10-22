@@ -65,7 +65,7 @@ export class VirtualTableComponent {
   public isEmptySubject$: Observable<boolean>;
 
   private filter$ = this.filterControl.valueChanges.pipe(
-    debounceTime(300),
+    debounceTime(350),
     startWith(null),
     distinctUntilChanged(),
     takeUntil(this._destroyed$),
@@ -126,6 +126,7 @@ export class VirtualTableComponent {
           }),
         ),
       ).pipe(
+        debounceTime(50),
         map(([sort, filterString, stream]) => {
           const sliceStream = stream.slice();
 
@@ -164,8 +165,6 @@ export class VirtualTableComponent {
           return [filterString, sliceStream];
         }),
         map(([filterString, stream]) => {
-          console.log(filterString, 'filter');
-          console.log(stream);
           const sliceStream = stream.slice();
           if (!filterString) {
             return sliceStream;
@@ -173,10 +172,12 @@ export class VirtualTableComponent {
           const filter = filterString.toLocaleLowerCase();
 
           const filterSliceStream = sliceStream.filter((item: VirtualTableItem) =>
-            Object.keys(item).some(
-              (key) => item[key] && item[key].toString().toLocaleLowerCase().indexOf(filter) > -1,
+            this.column.some(
+              (e) =>
+                this.getElement(item, e.func).toString().toLocaleLowerCase().indexOf(filter) > -1,
             ),
           );
+          console.log(filterSliceStream);
           return filterSliceStream;
         }),
         publishBehavior([]),
@@ -193,12 +194,8 @@ export class VirtualTableComponent {
     }
     this._headerWasSet = true;
     const columnArr = arr.map((item: VirtualTableColumn) => {
-      let columnItem;
-      if (typeof item === 'string') {
-        columnItem = this.createColumnFromString(item);
-      } else {
-        columnItem = item;
-      }
+      const columnItem = this.createColumnFromConfigColumn(item);
+
       if (this._headerDict[columnItem.key]) {
         throw Error(`Column key=${columnItem.key} already declare`);
       }
@@ -213,12 +210,23 @@ export class VirtualTableComponent {
     return func.call(this, item);
   }
 
-  private createColumnFromString(str: string): VirtualTableColumn {
+  private createColumnFromConfigColumn(item: string | VirtualTableColumn): VirtualTableColumn {
+    if (typeof item === 'string') {
+      return {
+        name: item,
+        key: item,
+        func: (e) => e[item],
+        sort: null,
+      };
+    }
+    if (!item.key) {
+      throw Error(`Column key for ${item} must be exist`);
+    }
     return {
-      name: str,
-      key: str,
-      func: (item) => item[str],
-      sort: null,
+      name: item.name || item.key,
+      key: item.key,
+      func: typeof item.func === 'function' ? item.func : (e) => e[item.key],
+      sort: item.sort || null,
     };
   }
 

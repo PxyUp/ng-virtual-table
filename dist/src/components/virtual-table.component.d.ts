@@ -24,7 +24,7 @@ export declare class VirtualTableComponent {
     ngOnChanges(changes: SimpleChanges): void;
     createColumnFromArray(arr: Array<VirtualTableColumn | string>): Array<VirtualTableColumn>;
     private getElement;
-    private createColumnFromString;
+    private createColumnFromConfigColumn;
     ngOnDestroy(): void;
     clickItem(item: VirtualTableItem): void;
     toggleFilter(): void;

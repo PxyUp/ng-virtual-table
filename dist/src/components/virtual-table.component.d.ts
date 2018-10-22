@@ -12,6 +12,7 @@ export declare class VirtualTableComponent {
     itemCount: number;
     dataSource: Observable<Array<VirtualTableItem>>;
     headerColumn: Array<string>;
+    onRowClick: (item: VirtualTableItem) => void;
     filterControl: FormControl;
     private _headerColumn;
     column: Array<VirtualTableColumn>;
@@ -24,5 +25,6 @@ export declare class VirtualTableComponent {
     ngOnChanges(changes: SimpleChanges): void;
     createColumnFromArray(arr: Array<string>): Array<VirtualTableColumn>;
     ngOnDestroy(): void;
+    clickItem(item: VirtualTableItem): void;
 }
 export {};

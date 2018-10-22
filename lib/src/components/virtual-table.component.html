@@ -1,11 +1,13 @@
 <div class="table">
   <div class="header">
-    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.name)">{{ headerItem.name }} {{ headerItem.sort }}</div>
+    <div *ngFor="let headerItem of column" class="header-item" (click)="applySort(headerItem.name)">{{ headerItem.name
+      }} {{ headerItem.sort }}</div>
     <input type="text" [formControl]="filterControl">
   </div>
-  <cdk-virtual-scroll-viewport [itemSize]="itemCount"  class="virtual-table-content">
-    <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row">
-      <div *ngFor="let headerItem of column" class="virtual-table-column">{{ item[headerItem.name] }}</div>
+  <cdk-virtual-scroll-viewport [itemSize]="itemCount" class="virtual-table-content">
+    <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
+      <div *ngFor="let headerItem of column" class="virtual-table-column">{{
+        item[headerItem.name] }}</div>
     </div>
   </cdk-virtual-scroll-viewport>
 </div>

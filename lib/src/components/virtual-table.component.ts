@@ -33,6 +33,8 @@ export class VirtualTableComponent {
 
   @Input() headerColumn: Array<string>;
 
+  @Input() onRowClick: (item: VirtualTableItem) => void;
+
   filterControl: FormControl = new FormControl('');
 
   private _headerColumn: Set<string> = new Set();
@@ -169,5 +171,9 @@ export class VirtualTableComponent {
 
   ngOnDestroy() {
     this._destroyed$.next();
+  }
+
+  clickItem(item: VirtualTableItem) {
+    if (typeof this.onRowClick === 'function') this.onRowClick(item);
   }
 }

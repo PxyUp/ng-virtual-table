@@ -125,13 +125,13 @@ $row-height: 20px;
       min-height: $row-height;
       justify-content: space-between;
       align-items: center;
+      padding-left: $padding-left;
       cursor: pointer;
     }
 
     &-column {
       display: flex;
       width: 100%;
-      padding-left: $padding-left;
       height: 100%;
       align-items: center;
     }

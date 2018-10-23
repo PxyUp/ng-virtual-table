@@ -9,12 +9,12 @@ export interface VirtualTableColumn {
   comp?: (a: any, b: any) => number;
   sort?: 'asc' | 'desc' | null | false;
   resizable?: boolean;
-  width?: number;
 }
 
 export interface VirtualTableColumnInternal extends VirtualTableColumn {
   activeResize?: boolean;
   growDisabled?: boolean;
+  width?: number;
 }
 
 export interface VirtualTableConfig {

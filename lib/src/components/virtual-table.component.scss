@@ -12,6 +12,7 @@ $row-height: 20px;
 $caret-padding: 0;
 $caret-width: 40px;
 $caret-height: 40px;
+$header-padding-top: 8px;
 
 :host {
   display: block;
@@ -28,7 +29,7 @@ $caret-height: 40px;
 
   .header {
     display: flex;
-    margin-top: 8px;
+    margin-top: $header-padding-top;
     height: $header-height;
     align-items: center;
     margin-left: $padding-left;
@@ -88,6 +89,7 @@ $caret-height: 40px;
         align-items: center;
         justify-content: center;
         right: $caret-padding;
+        cursor: pointer;
         z-index: 1;
         &.fixed {
           position: fixed;
@@ -140,7 +142,7 @@ $caret-height: 40px;
     &-content {
       display: flex;
       flex-direction: column;
-      height: calc(100% - #{$header-height});
+      height: calc(100% - #{$header-height} - #{$header-padding-top} - 1px);
 
       &-empty {
         padding-left: $padding-left;

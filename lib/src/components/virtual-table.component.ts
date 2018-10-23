@@ -54,7 +54,7 @@ export class VirtualTableComponent {
 
   @ViewChild('headerDiv') headerDiv: ElementRef;
 
-  @Input() dataSource: Observable<Array<VirtualTableItem>>;
+  @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
   @Input() filterPlaceholder = 'Filter';
 

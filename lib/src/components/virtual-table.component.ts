@@ -78,12 +78,8 @@ export class VirtualTableComponent {
 
   public isEmptySubject$: Observable<boolean>;
 
-  private filter$ = this.filterControl.valueChanges.pipe(
-    debounceTime(350),
-    startWith(null),
-    distinctUntilChanged(),
-    takeUntil(this._destroyed$),
-  );
+  private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
+    .pipe(debounceTime(350), startWith(null), distinctUntilChanged(), takeUntil(this._destroyed$));
 
   private _sort$: Observable<string> = this.sort$.asObservable();
 
@@ -130,7 +126,9 @@ export class VirtualTableComponent {
   ngOnChanges(changes: SimpleChanges) {
     if ('config' in changes) {
       this._config = changes.config.currentValue as VirtualTableConfig;
-      this.column = this.createColumnFromArray(this._config.column);
+      if (Array.isArray(this._config.column)) {
+        this.column = this.createColumnFromArray(this._config.column);
+      }
     }
 
     if ('dataSource' in changes) {

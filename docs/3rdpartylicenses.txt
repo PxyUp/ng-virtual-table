@@ -1009,9 +1009,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-@angular/cdk/scrolling
-
 @angular/material/icon
+
+@angular/cdk/scrolling
 
 zone.js
 MIT

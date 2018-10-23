@@ -19,4 +19,5 @@ export interface VirtualTableColumnInternal extends VirtualTableColumn {
 
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>;
+  filter?: boolean;
 }

@@ -1,6 +1,6 @@
 ## ng-virtual-table
 
-Angular 7 virtual scroll table with support filtering, sorting, and custom config column
+Angular 7 virtual scroll table with support filtering, sorting, resizable and custom config column
 
 📺 [Demo](https://pxyup.github.io/ng-virtual-table)
 
@@ -8,6 +8,15 @@ Angular 7 virtual scroll table with support filtering, sorting, and custom confi
 
 ## Configuration
 
+```typescipt
+  @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
+
+  @Input() filterPlaceholder = 'Filter';
+
+  @Input() config: VirtualTableConfig;
+
+  @Input() onRowClick: (item: VirtualTableItem) => void;
+```
 
 ```typescript
 
@@ -24,6 +33,7 @@ export interface VirtualTableColumn {
 
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>; // if config not provide will be auto generate column
+  filter?: boolean; // default false
 }
 ```
 

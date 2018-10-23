@@ -66,6 +66,8 @@ export class VirtualTableComponent {
     takeUntil(this._destroyed$),
   );
 
+  private _sort$: Observable<string> = this.sort$.asObservable();
+
   applySort(column: string) {
     this.column = this.column.map((item) => {
       if (item.key !== column) {
@@ -125,7 +127,7 @@ export class VirtualTableComponent {
             }
           }),
         ),
-        this.sort$.asObservable().pipe(startWith(this._sortAfterConfigWasSet())),
+        this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
         this.filter$,
       ).pipe(
         debounceTime(100),
@@ -180,6 +182,7 @@ export class VirtualTableComponent {
         }),
         publishBehavior([]),
         refCount(),
+        takeUntil(this._destroyed$),
       );
 
       this.isEmptySubject$ = this._dataStream.pipe(map((data) => !data.length));

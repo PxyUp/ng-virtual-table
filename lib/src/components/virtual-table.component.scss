@@ -112,12 +112,16 @@ $row-height: 20px;
       }
     }
 
-    &-content,
-    &-empty {
+    &-content {
       display: flex;
       flex-direction: column;
       height: calc(100% - #{$header-height});
+
+      &-empty {
+        padding-left: $padding-left;
+      }
     }
+
 
     &-row {
       display: flex;

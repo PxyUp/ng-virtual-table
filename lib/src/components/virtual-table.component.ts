@@ -226,7 +226,6 @@ export class VirtualTableComponent {
         comp: this.defaultComparator,
         sort: null,
         resizable: true,
-        width: 100,
       };
     }
     if (!item.key) {
@@ -239,7 +238,6 @@ export class VirtualTableComponent {
       comp: typeof item.comp === 'function' ? item.comp : this.defaultComparator,
       sort: item.sort === false || item.sort ? item.sort : null,
       resizable: item.resizable === false || item.resizable ? item.resizable : true,
-      width: item.width ? item.width : 100,
     };
   }
 

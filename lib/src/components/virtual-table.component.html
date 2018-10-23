@@ -1,8 +1,15 @@
 <div class="table">
   <div class="header">
-    <div *ngFor="let headerItem of column" class="header-item" [ngClass]="headerItem.sort === false ?  'not-clickable' : headerItem.sort ? headerItem.sort : ''" (click)="headerItem.sort !== false && applySort(headerItem.key)">{{
+    <div *ngFor="let headerItem of column" class="header-item" [ngClass]="{
+      'not-clickable': headerItem.sort === false,
+      'asc': headerItem.sort === 'asc',
+      'desc': headerItem.sort === 'desc'
+      }"
+      (click)="headerItem.sort !== false && applySort(headerItem.key)">{{
       headerItem.name
-      }}</div>
+      }}
+      <div *ngIf="headerItem.resizable" class="grabber"></div>
+    </div>
     <div class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">
       <input #inputFilterFocus class="filter-spot-input" matInput [placeholder]="filterPlaceholder" [formControl]="filterControl">
       <mat-icon (click)="toggleFilter()">{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>

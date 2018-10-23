@@ -2,8 +2,7 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
-    format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
 }
 
 $header-height: 40px;
@@ -68,6 +67,17 @@ $row-height: 20px;
       width: 100%;
       height: 100%;
       padding-left: $padding-left;
+      position: relative;
+
+      .grabber {
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        position: absolute;
+        right: 20px;
+        z-index: 1;
+        cursor: col-resize;
+      }
 
       &.not-clickable {
         cursor: default;

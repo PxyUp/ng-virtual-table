@@ -12,8 +12,9 @@
       headerItem.name
       }}
       <div class="grabber" *ngIf="headerItem.resizable" (click)="$event.stopPropagation()" (mouseup)="onResizeEnd($event, headerItem, index)"
-        (mousedown)="onResizeStart($event, headerItem, index)" (mousemove)="onResizing($event, headerItem)" (mouseout)="onResizeEnd($event, headerItem, index)"></div>
-    </div>
+        (mousedown)="onResizeStart($event, headerItem, index)" (mousemove)="onResizing($event, headerItem)" (mouseout)="onResizeEnd($event, headerItem, index)">
+      </div>
+      </div>
     <div class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">
       <input #inputFilterFocus class="filter-spot-input" matInput [placeholder]="filterPlaceholder" [formControl]="filterControl">
       <mat-icon (click)="toggleFilter()">{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>

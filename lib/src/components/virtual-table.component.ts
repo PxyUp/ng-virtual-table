@@ -16,6 +16,9 @@ import {
   takeUntil,
   publishBehavior,
   refCount,
+  timeout,
+  take,
+  skip,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import {
@@ -33,6 +36,8 @@ import {
 })
 export class VirtualTableComponent {
   private _caretRight = `0px`;
+  private _caretTop = `0px`;
+
   private _grabberSize = 40;
 
   public itemCount = 25;
@@ -199,6 +204,10 @@ export class VirtualTableComponent {
         takeUntil(this._destroyed$),
       );
 
+      this._dataStream.pipe(skip(1), take(1)).subscribe(() => {
+        this.columnResizeAction();
+      });
+
       this.isEmptySubject$ = this._dataStream.pipe(map((data) => !data.length));
     }
   }
@@ -284,7 +293,11 @@ export class VirtualTableComponent {
     this._isGrabing = false;
     column.activeResize = false;
     const target = event.target as HTMLElement;
+    target.classList.remove('fixed');
+    target.style.left = 'unset';
     target.style.right = this._caretRight;
+    target.style.top = this._caretTop;
+    this.columnResizeAction();
   }
 
   onResizeStart(event: MouseEvent, column: VirtualTableColumnInternal, index: number) {
@@ -292,17 +305,15 @@ export class VirtualTableComponent {
     this._oldWidth = event.clientX;
     column.activeResize = true;
 
-    this.columnSizePreStart(index);
-
     if (!column.width) {
       column.width = this.headerDiv.nativeElement.children[index].getBoundingClientRect().width;
     }
   }
 
-  private columnSizePreStart(index: number) {
+  private columnResizeAction() {
     const parent = this.headerDiv.nativeElement;
     let i = 0;
-    while (i < index) {
+    while (i < this.column.length) {
       this.column[i].width = parent.children[i].getBoundingClientRect().width;
       i += 1;
     }
@@ -314,15 +325,19 @@ export class VirtualTableComponent {
     }
     const target = event.target as HTMLElement;
     const targetLeft = event.clientX;
-    const targetParentSize = target.parentElement.getBoundingClientRect();
-    const columnLeft = targetParentSize.left + targetParentSize.width;
+    const targetTop = event.clientY;
+    const targetSize = target.getBoundingClientRect();
     if (
       column.width + (event.clientX - this._oldWidth) <=
       this.headerDiv.nativeElement.getBoundingClientRect().width
     ) {
-      target.style.right = `${columnLeft - targetLeft - this._grabberSize / 2}px`;
-      column.width += event.clientX - this._oldWidth;
-      this._oldWidth = event.clientX;
+      if (!target.classList.contains('fixed')) {
+        target.classList.add('fixed');
+      }
+      target.style.left = `${targetLeft - targetSize.width / 2}px`;
+      target.style.top = `${targetTop - targetSize.height / 2}px`;
+      column.width += targetLeft - this._oldWidth;
+      this._oldWidth = targetLeft;
     }
   }
 

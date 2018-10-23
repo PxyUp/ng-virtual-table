@@ -2,14 +2,16 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
+    format('woff2');
 }
 
 $header-height: 40px;
 $padding-left: 16px;
 $row-height: 20px;
 $caret-padding: 0;
-$catet-width: 40px;
+$caret-width: 40px;
+$caret-height: 40px;
 
 :host {
   display: block;
@@ -32,7 +34,6 @@ $catet-width: 40px;
     margin-left: $padding-left;
     margin-right: $padding-left;
     padding-right: $padding-left;
-
 
     .filter-spot {
       display: flex;
@@ -72,20 +73,35 @@ $catet-width: 40px;
       height: 100%;
       position: relative;
       flex: 1 1 auto;
-      min-width: $catet-width * 3;
+      min-width: $caret-width * 3;
 
       &.active {
         box-shadow: 0px 0px 2px 0px;
       }
 
       .grabber {
-        width: $catet-width;
-        height: 100%;
-        background-color: red;
+        width: $caret-width;
+        height: $caret-height;
         position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         right: $caret-padding;
         z-index: 1;
-        cursor: col-resize;
+        &.fixed {
+          position: fixed;
+        }
+        &:after {
+          content: 'swap_horiz';
+          font-family: 'Material Icons';
+          font-size: 24px;
+        }
+        &:active {
+          &:after {
+            color: #200eea;
+            font-weight: bold;
+          }
+        }
       }
 
       &.not-clickable {
@@ -130,7 +146,6 @@ $catet-width: 40px;
       }
     }
 
-
     &-row {
       display: flex;
       flex-direction: row;
@@ -146,7 +161,7 @@ $catet-width: 40px;
       flex: 1 1 calc(100% - #{$padding-left});
       height: 100%;
       align-items: center;
-      min-width: $catet-width * 3;
+      min-width: $caret-width * 3;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;

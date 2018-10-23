@@ -1,14 +1,18 @@
 <div class="table">
-  <div class="header">
-    <div *ngFor="let headerItem of column" class="header-item" [ngClass]="{
+  <div class="header" #headerDiv>
+    <div *ngFor="let headerItem of column; let index = index" class="header-item" [style.maxWidth.px]="headerItem.width"
+      [ngClass]="{
       'not-clickable': headerItem.sort === false,
       'asc': headerItem.sort === 'asc',
       'desc': headerItem.sort === 'desc',
-      'resizable': headerItem.resizable
+      'resizable': headerItem.resizable,
+      'active': headerItem.activeResize
       }"
       (click)="headerItem.sort !== false && applySort(headerItem.key)">{{
       headerItem.name
       }}
+      <div class="grabber" *ngIf="headerItem.resizable" (click)="$event.stopPropagation()" (mouseup)="onResizeEnd($event, headerItem, index)"
+        (mousedown)="onResizeStart($event, headerItem, index)" (mousemove)="onResizing($event, headerItem)" (mouseout)="onResizeEnd($event, headerItem, index)"></div>
     </div>
     <div class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">
       <input #inputFilterFocus class="filter-spot-input" matInput [placeholder]="filterPlaceholder" [formControl]="filterControl">
@@ -18,7 +22,7 @@
   <div class="virtual-table-content">
     <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemCount">
       <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
-        <div *ngFor="let headerItem of column" class="virtual-table-column">{{
+        <div *ngFor="let headerItem of column" [style.maxWidth.px]="headerItem.width" class="virtual-table-column">{{
           getElement(item, headerItem.func) }}</div>
       </div>
     </cdk-virtual-scroll-viewport>

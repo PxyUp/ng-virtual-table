@@ -12,6 +12,11 @@ export interface VirtualTableColumn {
   width?: number;
 }
 
+export interface VirtualTableColumnInternal extends VirtualTableColumn {
+  activeResize?: boolean;
+  growDisabled?: boolean;
+}
+
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>;
 }

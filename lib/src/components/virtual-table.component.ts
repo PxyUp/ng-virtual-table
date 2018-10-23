@@ -16,9 +16,17 @@ import {
   takeUntil,
   publishBehavior,
   refCount,
+  timeout,
+  take,
+  skip,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import { VirtualTableConfig, VirtualTableItem, VirtualTableColumn } from '../interfaces';
+import {
+  VirtualTableConfig,
+  VirtualTableItem,
+  VirtualTableColumn,
+  VirtualTableColumnInternal,
+} from '../interfaces';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -27,15 +35,26 @@ import { VirtualTableConfig, VirtualTableItem, VirtualTableColumn } from '../int
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtualTableComponent {
+  private _caretRight = `0px`;
+  private _caretTop = `0px`;
+
+  private _grabberSize = 40;
+
   public itemCount = 25;
 
   private _config: VirtualTableConfig;
+
+  private _isGrabing = false;
+
+  private _oldWidth: number;
 
   public filterIsOpen = false;
 
   @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
 
-  @Input() dataSource: Observable<Array<VirtualTableItem>>;
+  @ViewChild('headerDiv') headerDiv: ElementRef;
+
+  @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
   @Input() filterPlaceholder = 'Filter';
 
@@ -45,9 +64,9 @@ export class VirtualTableComponent {
 
   filterControl: FormControl = new FormControl('');
 
-  private _headerDict: { [key: string]: VirtualTableColumn } = Object.create(null);
+  private _headerDict: { [key: string]: VirtualTableColumnInternal } = Object.create(null);
 
-  public column: Array<VirtualTableColumn> = [];
+  public column: Array<VirtualTableColumnInternal> = [];
 
   public _dataStream: Observable<Array<VirtualTableItem>> = EMPTY;
 
@@ -185,6 +204,10 @@ export class VirtualTableComponent {
         takeUntil(this._destroyed$),
       );
 
+      this._dataStream.pipe(skip(1), take(1)).subscribe(() => {
+        this.columnResizeAction();
+      });
+
       this.isEmptySubject$ = this._dataStream.pipe(map((data) => !data.length));
     }
   }
@@ -197,7 +220,9 @@ export class VirtualTableComponent {
     return null;
   }
 
-  createColumnFromArray(arr: Array<VirtualTableColumn | string>): Array<VirtualTableColumn> {
+  createColumnFromArray(
+    arr: Array<VirtualTableColumn | string>,
+  ): Array<VirtualTableColumnInternal> {
     if (!arr || arr.length === 0) {
       return;
     }
@@ -220,7 +245,9 @@ export class VirtualTableComponent {
     return func.call(this, item);
   }
 
-  private createColumnFromConfigColumn(item: string | VirtualTableColumn): VirtualTableColumn {
+  private createColumnFromConfigColumn(
+    item: string | VirtualTableColumn,
+  ): VirtualTableColumnInternal {
     if (typeof item === 'string') {
       return {
         name: item,
@@ -260,6 +287,58 @@ export class VirtualTableComponent {
       return -1;
     }
     return 0;
+  }
+
+  onResizeEnd(event: MouseEvent, column: VirtualTableColumnInternal, index: number) {
+    this._isGrabing = false;
+    column.activeResize = false;
+    const target = event.target as HTMLElement;
+    target.classList.remove('fixed');
+    target.style.left = 'unset';
+    target.style.right = this._caretRight;
+    target.style.top = this._caretTop;
+    this.columnResizeAction();
+  }
+
+  onResizeStart(event: MouseEvent, column: VirtualTableColumnInternal, index: number) {
+    this._isGrabing = true;
+    this._oldWidth = event.clientX;
+    column.activeResize = true;
+
+    if (!column.width) {
+      column.width = this.headerDiv.nativeElement.children[index].getBoundingClientRect().width;
+    }
+  }
+
+  private columnResizeAction() {
+    const parent = this.headerDiv.nativeElement;
+    let i = 0;
+    while (i < this.column.length) {
+      this.column[i].width = parent.children[i].getBoundingClientRect().width;
+      i += 1;
+    }
+  }
+
+  onResizing(event: MouseEvent, column: VirtualTableColumnInternal) {
+    if (!this._isGrabing) {
+      return;
+    }
+    const target = event.target as HTMLElement;
+    const targetLeft = event.clientX;
+    const targetTop = event.clientY;
+    const targetSize = target.getBoundingClientRect();
+    if (
+      column.width + (event.clientX - this._oldWidth) <=
+      this.headerDiv.nativeElement.getBoundingClientRect().width
+    ) {
+      if (!target.classList.contains('fixed')) {
+        target.classList.add('fixed');
+      }
+      target.style.left = `${targetLeft - targetSize.width / 2}px`;
+      target.style.top = `${targetTop - targetSize.height / 2}px`;
+      column.width += targetLeft - this._oldWidth;
+      this._oldWidth = targetLeft;
+    }
   }
 
   toggleFilter() {

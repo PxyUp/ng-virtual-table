@@ -2,9 +2,12 @@
 
 Angular 7 virtual scroll table with support filtering, sorting, and custom config column
 
+📺 [Demo](https://pxyup.github.io/ng-virtual-table)
+
 [![NPM](https://nodei.co/npm/ng-virtual-table.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ng-virtual-table/)
 
 ## Configuration
+
 
 ```typescript
 
@@ -16,6 +19,7 @@ export interface VirtualTableColumn {
   func?: (item: VirtualTableItem) => any; // function for get value from item
   comp?: (a: any, b: any) => number; // function for compare two item, depend from `func` function
   sort?: 'asc' | 'desc' | null | false;  // sort by default(support only one sort), false for disable
+  resizable?: boolean; // default true(if not set `true`))
 }
 
 export interface VirtualTableConfig {
@@ -79,5 +83,3 @@ import { VirtualTableConfig } from 'ng-virtual-table';
 
 <ng-virtual-table [dataSource]="dataSource1" [onRowClick]="clickToItem" [config]="config"></ng-virtual-table>
 ```
-
-📺 [Demo](https://pxyup.github.io/ng-virtual-table)

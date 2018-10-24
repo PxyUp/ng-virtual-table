@@ -57,6 +57,8 @@ export class VirtualTableComponent {
 
   @Input() filterPlaceholder = 'Filter';
 
+  @Input() dataSetEmptyPlaceholder = 'Data is empty';
+
   @Input() config: VirtualTableConfig;
 
   @Input() onRowClick: (item: VirtualTableItem) => void;

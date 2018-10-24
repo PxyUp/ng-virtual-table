@@ -2,8 +2,7 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
-    format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
 }
 
 $header-height: 40px;
@@ -33,16 +32,20 @@ $header-padding-top: 8px;
     height: $header-height;
     align-items: center;
     margin-left: $padding-left;
+    padding-top: 1px;
+    overflow: hidden;
     margin-right: $padding-left;
     padding-right: $padding-left;
 
     .filter-spot {
       display: flex;
       align-items: center;
-      right: 0;
-      width: 15px;
-      min-width: 15px;
-      height: 100%;
+      right: $padding-left;
+      width: $header-height/2;
+      min-width: $header-height/2;
+      z-index: 1;
+      background-color: white;
+      height: $header-height;
       position: absolute;
 
       .filter-spot-input {
@@ -56,6 +59,7 @@ $header-padding-top: 8px;
 
       &.open {
         z-index: 2;
+
         mat-icon {
           z-index: 2;
         }
@@ -91,14 +95,17 @@ $header-padding-top: 8px;
         right: $caret-padding;
         cursor: pointer;
         z-index: 1;
+
         &.fixed {
           position: fixed;
         }
+
         &:after {
           content: 'swap_horiz';
           font-family: 'Material Icons';
           font-size: 24px;
         }
+
         &:active {
           &:after {
             color: #200eea;

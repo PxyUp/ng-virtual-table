@@ -8,10 +8,12 @@ Angular 7 virtual scroll table with support dynamic component, filtering, sortin
 
 ## Configuration
 
-```typescipt
+```typescript
   @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
   @Input() filterPlaceholder = 'Filter';
+
+  @Input() dataSetEmptyPlaceholder = 'Data is empty';
 
   @Input() config: VirtualTableConfig;
 

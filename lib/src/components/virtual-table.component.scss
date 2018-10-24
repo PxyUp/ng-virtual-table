@@ -2,7 +2,8 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
+    format('woff2');
 }
 
 $header-height: 40px;
@@ -32,8 +33,6 @@ $header-padding-top: 8px;
     height: $header-height;
     align-items: center;
     margin-left: $padding-left;
-    padding-top: 1px;
-    overflow: hidden;
     margin-right: $padding-left;
     padding-right: $padding-left;
 
@@ -44,7 +43,6 @@ $header-padding-top: 8px;
       width: $header-height/2;
       min-width: $header-height/2;
       z-index: 1;
-      background-color: white;
       height: $header-height;
       position: absolute;
 
@@ -85,20 +83,25 @@ $header-padding-top: 8px;
         box-shadow: 0px 0px 2px 0px;
       }
 
+      &.resizable {
+        justify-content: space-between;
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+      }
+
       .grabber {
         width: $caret-width;
         height: $caret-height;
-        position: absolute;
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
         right: $caret-padding;
         cursor: pointer;
         z-index: 1;
-
-        &.fixed {
-          position: fixed;
-        }
 
         &:after {
           content: 'swap_horiz';
@@ -119,18 +122,22 @@ $header-padding-top: 8px;
       }
 
       &.asc {
-        &:after {
-          margin-right: 4px;
-          content: 'arrow_downward';
-          font-family: 'Material Icons';
+        .title {
+          &:after {
+            margin-right: 4px;
+            content: 'arrow_downward';
+            font-family: 'Material Icons';
+          }
         }
       }
 
       &.desc {
-        &:after {
-          margin-right: 4px;
-          font-family: 'Material Icons';
-          content: 'arrow_upward';
+        .title {
+          &:after {
+            margin-right: 4px;
+            font-family: 'Material Icons';
+            content: 'arrow_upward';
+          }
         }
       }
     }

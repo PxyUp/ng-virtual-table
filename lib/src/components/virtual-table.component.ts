@@ -26,6 +26,7 @@ import {
   VirtualTableColumn,
   VirtualTableColumnInternal,
 } from '../interfaces';
+import { CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -34,14 +35,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtualTableComponent {
-  private _caretRight = `0px`;
-  private _caretTop = `0px`;
-
-  private _grabberSize = 40;
-
   private _config: VirtualTableConfig;
-
-  private _isGrabing = false;
 
   private _oldWidth: number;
 
@@ -290,24 +284,39 @@ export class VirtualTableComponent {
     return 0;
   }
 
-  onResizeEnd(event: MouseEvent, column: VirtualTableColumnInternal, index: number) {
-    this._isGrabing = false;
-    column.activeResize = false;
-    const target = event.target as HTMLElement;
-    target.classList.remove('fixed');
-    target.style.left = 'unset';
-    target.style.right = this._caretRight;
-    target.style.top = this._caretTop;
-    this.columnResizeAction();
-  }
-
-  onResizeStart(event: MouseEvent, column: VirtualTableColumnInternal, index: number) {
-    this._isGrabing = true;
-    this._oldWidth = event.clientX;
+  resizeStart(column: VirtualTableColumnInternal, index: number) {
     column.activeResize = true;
-
     if (!column.width) {
       column.width = this.headerDiv.nativeElement.children[index].getBoundingClientRect().width;
+    }
+  }
+
+  resizeEnd(column: VirtualTableColumnInternal, grabberReset = false, grabber?: HTMLElement) {
+    column.activeResize = false;
+    this._oldWidth = null;
+    this.columnResizeAction();
+    if (grabberReset) {
+      grabber.style.transform = 'none';
+    }
+  }
+
+  resizingEvent(event: CdkDragMove<any>, column: VirtualTableColumnInternal) {
+    const targetLeft = event.pointerPosition.x;
+    const grabber = event.source.element.nativeElement as HTMLElement;
+    const grabberSize = grabber.getBoundingClientRect().width;
+    if (!this._oldWidth) {
+      this._oldWidth = targetLeft;
+    }
+    const newWidth = column.width + (targetLeft - this._oldWidth);
+    if (
+      column.width + (targetLeft - this._oldWidth) <=
+        this.headerDiv.nativeElement.getBoundingClientRect().width ||
+      grabberSize * 3 > newWidth
+    ) {
+      column.width = newWidth;
+      this._oldWidth = targetLeft;
+    } else {
+      this.resizeEnd(column, true, grabber);
     }
   }
 
@@ -317,28 +326,6 @@ export class VirtualTableComponent {
     while (i < this.column.length) {
       this.column[i].width = parent.children[i].getBoundingClientRect().width;
       i += 1;
-    }
-  }
-
-  onResizing(event: MouseEvent, column: VirtualTableColumnInternal) {
-    if (!this._isGrabing) {
-      return;
-    }
-    const target = event.target as HTMLElement;
-    const targetLeft = event.clientX;
-    const targetTop = event.clientY;
-    const targetSize = target.getBoundingClientRect();
-    if (
-      column.width + (event.clientX - this._oldWidth) <=
-      this.headerDiv.nativeElement.getBoundingClientRect().width
-    ) {
-      if (!target.classList.contains('fixed')) {
-        target.classList.add('fixed');
-      }
-      target.style.left = `${targetLeft - targetSize.width / 2}px`;
-      target.style.top = `${targetTop - targetSize.height / 2}px`;
-      column.width += targetLeft - this._oldWidth;
-      this._oldWidth = targetLeft;
     }
   }
 

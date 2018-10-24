@@ -1,6 +1,6 @@
 {
   "name": "ng-virtual-table",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Virtual table for angular 7+. Support filtering, sorting, custom config",
   "main": "index.js",
   "repository": "git@github.com:PxyUp/ng-virtual-table.git",
@@ -18,11 +18,7 @@
       "entryFile": "./lib/public_api.ts"
     },
     "cssUrl": "inline",
-    "whitelistedNonPeerDependencies": [
-      "angular",
-      "rxjs",
-      "ng-dynamic-component"
-    ]
+    "whitelistedNonPeerDependencies": ["angular", "rxjs", "ng-dynamic-component"]
   },
   "peerDependencies": {
     "@angular/animations": "^7.0.0",
@@ -63,15 +59,9 @@
     }
   },
   "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
+    "extends": ["@commitlint/config-conventional"],
     "rules": {
-      "header-max-length": [
-        2,
-        "always",
-        80
-      ]
+      "header-max-length": [2, "always", 80]
     }
   },
   "keywords": [

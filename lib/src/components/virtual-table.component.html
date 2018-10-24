@@ -1,6 +1,6 @@
 <div class="table">
   <div class="header" #headerDiv>
-    <div *ngFor="let headerItem of column; let index = index" class="header-item" [style.maxWidth.px]="headerItem.width"
+    <div cdkDropList *ngFor="let headerItem of column; let index = index" class="header-item" [style.maxWidth.px]="headerItem.width"
       [ngClass]="{
       'not-clickable': headerItem.sort === false,
       'asc': headerItem.sort === 'asc',

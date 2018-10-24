@@ -310,7 +310,7 @@ export class VirtualTableComponent {
     const newWidth = column.width + (targetLeft - this._oldWidth);
     if (
       column.width + (targetLeft - this._oldWidth) <=
-        this.headerDiv.nativeElement.getBoundingClientRect().width / this.column.length ||
+        this.headerDiv.nativeElement.getBoundingClientRect().width ||
       grabberSize * 3 > newWidth
     ) {
       column.width = newWidth;

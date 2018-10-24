@@ -1,6 +1,6 @@
 ## ng-virtual-table
 
-Angular 7 virtual scroll table with support filtering, sorting, resizable and custom config column
+Angular 7 virtual scroll table with support dynamic component, filtering, sorting, resizable and custom config column
 
 📺 [Demo](https://pxyup.github.io/ng-virtual-table)
 
@@ -84,11 +84,11 @@ import { VirtualTableConfig } from 'ng-virtual-table';
         name: 'Full Age',
         sort: 'desc', // pre defined sort
         component: {
-        componentConstructor: InfoComponent,
-        inputs: {
-          title: (e) => e.age,
+          componentConstructor: InfoComponent,
+          inputs: {
+            title: (e) => e.age,
+          },
         },
-      },
       },
       {
         key: 'label',

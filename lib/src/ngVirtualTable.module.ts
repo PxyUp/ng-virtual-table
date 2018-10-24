@@ -5,6 +5,7 @@ import {
   CdkVirtualForOf,
   CdkVirtualForOfContext,
 } from '@angular/cdk/scrolling';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { VirtualTableComponent } from './components/virtual-table.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -35,6 +36,7 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
     MatIconModule,
     MatFormFieldModule,
     ScrollDispatchModule,
+    DragDropModule,
     DynamicModule.withComponents([]),
   ],
   exports: [VirtualTableComponent],

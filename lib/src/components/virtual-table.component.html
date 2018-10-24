@@ -8,11 +8,12 @@
       'resizable': headerItem.resizable,
       'active': headerItem.activeResize
       }"
-      (click)="headerItem.sort !== false && applySort(headerItem.key)">{{
-      headerItem.name
-      }}
-      <div class="grabber" *ngIf="headerItem.resizable" (click)="$event.stopPropagation()" (mouseup)="onResizeEnd($event, headerItem, index)"
-        (mousedown)="onResizeStart($event, headerItem, index)" (mousemove)="onResizing($event, headerItem)" (mouseout)="onResizeEnd($event, headerItem, index)">
+      (click)="headerItem.sort !== false && applySort(headerItem.key)">
+      <div class="title">
+        {{ headerItem.name }}
+      </div>
+      <div class="grabber" *ngIf="headerItem.resizable" (click)="$event.stopPropagation()" cdkDragLockAxis="x" cdkDrag
+        (cdkDragStarted)="resizeStart(headerItem, index)" (cdkDragEnded)="resizeEnd(headerItem)" (cdkDragMoved)="resizingEvent($event, headerItem)">
       </div>
     </div>
     <div *ngIf="config && config.filter" class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">

@@ -32,6 +32,7 @@ $header-padding-top: 8px;
     margin-top: $header-padding-top;
     height: $header-height;
     align-items: center;
+    overflow-x: scroll;
     margin-left: $padding-left;
     margin-right: $padding-left;
     padding-right: $padding-left;

@@ -29,12 +29,20 @@ export interface VirtualTableColumn {
   comp?: (a: any, b: any) => number; // function for compare two item, depend from `func` function
   sort?: 'asc' | 'desc' | null | false;  // sort by default(support only one sort), false for disable
   resizable?: boolean; // default true(if not set `true`))
+  component?: VirtualTableColumnComponent | false; // default false (You class component must be part of entryComponents in yor Module!!!!!)
 }
 
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>; // if config not provide will be auto generate column
   filter?: boolean; // default false
 }
+
+export interface VirtualTableColumnComponent {
+  componentConstructor: Type<any>;
+  inputs?: Object; // default {}
+  outputs?: Object;
+}
+
 ```
 
 ## Example
@@ -42,6 +50,9 @@ export interface VirtualTableConfig {
 ```typescript
 import { VirtualTableConfig } from 'ng-virtual-table';
 
+  clickToItem(item: any) {
+    console.log(item);
+  }
 
   dataSource = of(
     Array(1000).fill(0).map((e) => ({
@@ -72,6 +83,12 @@ import { VirtualTableConfig } from 'ng-virtual-table';
         key: 'age',
         name: 'Full Age',
         sort: 'desc', // pre defined sort
+        component: {
+        componentConstructor: InfoComponent,
+        inputs: {
+          title: (e) => e.age,
+        },
+      },
       },
       {
         key: 'label',
@@ -82,10 +99,22 @@ import { VirtualTableConfig } from 'ng-virtual-table';
     ],
   };
 
-  clickToItem(item: any) {
-    console.log(item);
-  }
+  /*
 
+    export class InfoComponent implements OnInit {
+      @Input() title: string;
+
+      constructor() {}
+
+      ngOnInit() {}
+
+      click(event: MouseEvent) {
+        event.stopPropagation();
+        console.log(this.title);
+      }
+    }
+
+  */
 ```
 
 ```html

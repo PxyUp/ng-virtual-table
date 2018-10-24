@@ -10,6 +10,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { DynamicModule } from 'ng-dynamic-component';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -34,6 +35,7 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
     MatIconModule,
     MatFormFieldModule,
     ScrollDispatchModule,
+    DynamicModule.withComponents([]),
   ],
   exports: [VirtualTableComponent],
   providers: [],

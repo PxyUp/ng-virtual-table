@@ -16,7 +16,6 @@ import {
   takeUntil,
   publishBehavior,
   refCount,
-  timeout,
   take,
   skip,
 } from 'rxjs/operators';
@@ -254,6 +253,7 @@ export class VirtualTableComponent {
         comp: this.defaultComparator,
         sort: null,
         resizable: true,
+        component: false,
       };
     }
     if (!item.key) {
@@ -266,6 +266,7 @@ export class VirtualTableComponent {
       comp: typeof item.comp === 'function' ? item.comp : this.defaultComparator,
       sort: item.sort === false || item.sort ? item.sort : null,
       resizable: item.resizable === false || item.resizable ? item.resizable : true,
+      component: item.component ? item.component : false,
     };
   }
 
@@ -347,5 +348,22 @@ export class VirtualTableComponent {
       });
     }
     this.filterControl.setValue('', { emitEvent: !this.filterIsOpen });
+  }
+
+  transformDynamicInput(input: Object, item: VirtualTableItem): Object {
+    const answer = Object.create(null);
+
+    if (!input) {
+      return answer;
+    }
+    Object.keys(input).forEach((key) => {
+      if (typeof input[key] === 'function') {
+        answer[key] = this.getElement(item, input[key]);
+        return;
+      }
+      answer[key] = input[key];
+    });
+
+    return answer;
   }
 }

@@ -100,7 +100,7 @@ $header-padding-top: 8px;
         align-items: center;
         justify-content: center;
         right: $caret-padding;
-        cursor: pointer;
+        cursor: col-resize;
         z-index: 1;
 
         &:after {

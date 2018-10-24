@@ -21,7 +21,7 @@
     </div>
   </div>
   <div class="virtual-table-content">
-    <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemCount">
+    <cdk-virtual-scroll-viewport *ngIf="!(isEmptySubject$ | async); else emptyContainer" [itemSize]="itemSize">
       <div *cdkVirtualFor="let item of _dataStream;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
         <div *ngFor="let headerItem of column" [style.maxWidth.px]="headerItem.width" class="virtual-table-column">
           <ng-container *ngIf="!headerItem.component;else dynamic">

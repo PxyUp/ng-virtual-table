@@ -39,8 +39,6 @@ export class VirtualTableComponent {
 
   private _grabberSize = 40;
 
-  public itemCount = 25;
-
   private _config: VirtualTableConfig;
 
   private _isGrabing = false;
@@ -48,6 +46,8 @@ export class VirtualTableComponent {
   private _oldWidth: number;
 
   public filterIsOpen = false;
+
+  @Input() itemSize = 25;
 
   @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
 

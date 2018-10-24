@@ -79,7 +79,13 @@
     "scroll",
     "ngx",
     "angular",
-    "angular 7"
+    "angular 7",
+    "ngx",
+    "dynamic",
+    "component",
+    "input",
+    "output",
+    "life-cycle"
   ],
   "dependencies": {
     "ng-dynamic-component": "^3.1.2"

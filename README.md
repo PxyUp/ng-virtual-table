@@ -2,9 +2,24 @@
 
 Angular 7 virtual scroll table with support dynamic component, filtering, sorting, resizable and custom config column
 
+
+## Install and Use
+
+```bash
+npm i ng-virtual-table
+yarn add ng-virtual-table
+```
+
+```typescript
+import { NgVirtualTableModule } from 'ng-virtual-table';
+
+imports: [NgVirtualTableModule],
+```
+
 📺 [Demo](https://pxyup.github.io/ng-virtual-table)
 
 [![NPM](https://nodei.co/npm/ng-virtual-table.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ng-virtual-table/)
+
 
 ## Configuration
 

@@ -26,7 +26,7 @@ import {
   VirtualTableColumn,
   VirtualTableColumnInternal,
 } from '../interfaces';
-import { CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
+import { CdkDragMove, CdkDragStart, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -250,6 +250,7 @@ export class VirtualTableComponent {
         sort: null,
         resizable: true,
         component: false,
+        draggable: true,
       };
     }
     if (!item.key) {
@@ -263,6 +264,7 @@ export class VirtualTableComponent {
       sort: item.sort === false || item.sort ? item.sort : null,
       resizable: item.resizable === false || item.resizable ? item.resizable : true,
       component: item.component ? item.component : false,
+      draggable: item.draggable === false || item.draggable ? item.draggable : true,
     };
   }
 
@@ -339,6 +341,10 @@ export class VirtualTableComponent {
     this.filterControl.setValue('', { emitEvent: !this.filterIsOpen });
   }
 
+  dropColumn(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.column, event.previousIndex, event.currentIndex);
+  }
+
   transformDynamicInput(input: Object, item: VirtualTableItem): Object {
     const answer = Object.create(null);
 
@@ -354,5 +360,13 @@ export class VirtualTableComponent {
     });
 
     return answer;
+  }
+
+  getHeaderItem(index: number) {
+    return `.header-item[data-index="${index}"]`;
+  }
+
+  mouseDownBlock(event: MouseEvent) {
+    event.stopImmediatePropagation();
   }
 }

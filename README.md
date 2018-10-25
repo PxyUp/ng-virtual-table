@@ -13,7 +13,7 @@ yarn add ng-virtual-table
 ```typescript
 import { NgVirtualTableModule } from 'ng-virtual-table';
 
-imports: [NgVirtualTableModule],
+imports: [NgVirtualTableModule.forRoot()],
 ```
 
 ```html

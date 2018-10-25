@@ -363,10 +363,6 @@ export class VirtualTableComponent {
     return answer;
   }
 
-  getHeaderItem(index: number) {
-    return `.header-item[data-index="${index}"]`;
-  }
-
   mouseDownBlock(event: MouseEvent) {
     event.stopImmediatePropagation();
   }

@@ -10,6 +10,9 @@ npm i ng-virtual-table
 yarn add ng-virtual-table
 ```
 
+Make sure you have:
+`@angular/cdk` `@angular/material` `@angular/forms`
+
 ```typescript
 import { NgVirtualTableModule } from 'ng-virtual-table';
 

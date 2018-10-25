@@ -2,8 +2,7 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
-    format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
 }
 
 $header-height: 40px;
@@ -32,7 +31,8 @@ $header-padding-top: 8px;
     margin-top: $header-padding-top;
     height: $header-height;
     align-items: center;
-    overflow-x: scroll;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin-left: $padding-left;
     margin-right: $padding-left;
     padding-right: $padding-left;

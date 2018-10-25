@@ -122,6 +122,7 @@ export class VirtualTableComponent {
     if ('config' in changes) {
       this._config = changes.config.currentValue as VirtualTableConfig;
       if (Array.isArray(this._config.column)) {
+        this._headerDict = Object.create(null);
         this.column = this.createColumnFromArray(this._config.column);
       }
     }

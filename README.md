@@ -16,6 +16,10 @@ import { NgVirtualTableModule } from 'ng-virtual-table';
 imports: [NgVirtualTableModule],
 ```
 
+```html
+<ng-virtual-table [dataSource]="dataSource"></ng-virtual-table>
+```
+
 📺 [Demo](https://pxyup.github.io/ng-virtual-table)
 
 [![NPM](https://nodei.co/npm/ng-virtual-table.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ng-virtual-table/)

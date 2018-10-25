@@ -11,6 +11,7 @@ export interface VirtualTableColumn {
   comp?: (a: any, b: any) => number;
   sort?: 'asc' | 'desc' | null | false;
   resizable?: boolean;
+  draggable?: boolean;
   component?: VirtualTableColumnComponent | false;
 }
 

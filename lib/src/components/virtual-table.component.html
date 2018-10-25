@@ -1,15 +1,22 @@
 <div class="table">
-  <div class="header" #headerDiv>
-    <div cdkDropList *ngFor="let headerItem of column; let index = index" class="header-item" [style.maxWidth.px]="headerItem.width"
-      [ngClass]="{
+  <div class="header" #headerDiv cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="dropColumn($event)">
+    <div cdkDropList *ngFor="let headerItem of column; let index = index" class="header-item" [attr.data-index]="index"
+      [style.maxWidth.px]="headerItem.width" [ngClass]="{
       'not-clickable': headerItem.sort === false,
       'asc': headerItem.sort === 'asc',
       'desc': headerItem.sort === 'desc',
       'resizable': headerItem.resizable,
-      'active': headerItem.activeResize
+      'active': headerItem.activeResize,
+      'draggable': headerItem.draggable
       }"
-      (click)="headerItem.sort !== false && applySort(headerItem.key)">
+      (click)="headerItem.sort !== false && applySort(headerItem.key)" cdkDrag (mousedown)="!headerItem.draggable && mouseDownBlock($event)">
       <div class="title">
+        <div *ngIf="headerItem.draggable" class="drag-order-handle">
+          <svg width="18px" fill="currentColor" cdkDragHandle viewBox="0 0 24 24">
+            <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+            <path d="M0 0h24v24H0z" fill="none"></path>
+          </svg>
+        </div>
         {{ headerItem.name }}
       </div>
       <div class="grabber" *ngIf="headerItem.resizable" (click)="$event.stopPropagation()" cdkDragLockAxis="x" cdkDrag

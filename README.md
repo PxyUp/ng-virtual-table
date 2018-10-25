@@ -1,6 +1,6 @@
 ## ng-virtual-table
 
-Angular 7 virtual scroll table with support dynamic component, filtering, sorting, resizable and custom config column
+Angular 7 virtual scroll table with support dynamic component, draggable, filtering, sorting, resizable and custom config column
 
 
 ## Install and Use
@@ -49,10 +49,11 @@ config:VirtualTableConfig
 export interface VirtualTableColumn {
   name?: string; // Label for field, if absent will be use key
   key: string; // Uniq key for filed, 
-  func?: (item: VirtualTableItem) => any; // function for get value from item
+  func?: (item: VirtualTableItem) => any; // function for get value from dataSource item
   comp?: (a: any, b: any) => number; // function for compare two item, depend from `func` function
   sort?: 'asc' | 'desc' | null | false;  // sort by default(support only one sort), false for disable
-  resizable?: boolean; // default true(if not set `true`))
+  resizable?: boolean; // default true(if not set `true`)
+  draggable?: boolean; // default true (if not set `true`)
   component?: VirtualTableColumnComponent | false; // default false (You class component must be part of entryComponents in yor Module!!!!!)
 }
 

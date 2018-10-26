@@ -103,6 +103,14 @@ export class VirtualTableComponent {
     this.sort$.next(column);
   }
 
+  headerItemDragStarted() {
+    (this.headerDiv.nativeElement as HTMLElement).classList.add('cdk-drop-list-dragging');
+  }
+
+  headerItemDragFinished() {
+    (this.headerDiv.nativeElement as HTMLElement).classList.remove('cdk-drop-list-dragging');
+  }
+
   applyConfig(config: VirtualTableConfig) {
     const columnArr = config.column;
     this.showHeader = config.header === false ? false : true;

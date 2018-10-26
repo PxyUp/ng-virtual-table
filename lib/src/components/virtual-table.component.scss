@@ -204,7 +204,7 @@ $active-box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
       display: flex;
       flex-direction: row;
       min-height: $row-height;
-      align-items: center;
+      align-items: stretch;
       margin-left: $padding-left;
       margin-right: $padding-left;
       cursor: pointer;
@@ -213,8 +213,6 @@ $active-box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
     &-column {
       display: block;
       flex: 1 1 calc(100% - #{$padding-left});
-      height: 100%;
-      align-items: center;
       min-width: $caret-width * 3;
       white-space: nowrap;
       overflow: hidden;

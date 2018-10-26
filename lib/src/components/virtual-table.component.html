@@ -1,7 +1,8 @@
 <div class="table">
-  <div class="header" #headerDiv cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="dropColumn($event)">
-    <div cdkDropList *ngFor="let headerItem of column; let index = index" class="header-item" [attr.data-index]="index"
-      [style.maxWidth.px]="headerItem.width" [ngClass]="{
+  <div *ngIf="showHeader" class="header" #headerDiv cdkDropList cdkDropListOrientation="horizontal"
+    (cdkDropListDropped)="dropColumn($event)">
+    <div cdkDropList *ngFor="let headerItem of column; let index = index" class="header-item" [style.maxWidth.px]="headerItem.width"
+      [ngClass]="{
       'not-clickable': headerItem.sort === false,
       'asc': headerItem.sort === 'asc',
       'desc': headerItem.sort === 'desc',

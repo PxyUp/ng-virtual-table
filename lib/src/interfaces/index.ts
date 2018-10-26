@@ -29,5 +29,6 @@ export interface VirtualTableColumnComponent {
 
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>;
+  header?: boolean;
   filter?: boolean;
 }

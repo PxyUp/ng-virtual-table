@@ -26,7 +26,7 @@ import {
   VirtualTableColumn,
   VirtualTableColumnInternal,
 } from '../interfaces';
-import { CdkDragMove, CdkDragStart, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -70,6 +70,8 @@ export class VirtualTableComponent {
   private _destroyed$ = new Subject<void>();
 
   private _headerWasSet = false;
+
+  public showHeader = true;
 
   public isEmptySubject$: Observable<boolean>;
 
@@ -121,9 +123,11 @@ export class VirtualTableComponent {
   ngOnChanges(changes: SimpleChanges) {
     if ('config' in changes) {
       this._config = changes.config.currentValue as VirtualTableConfig;
-      if (Array.isArray(this._config.column)) {
+      const columnArr = this._config.column;
+      this.showHeader = this._config.header === false ? false : true;
+      if (Array.isArray(columnArr)) {
         this._headerDict = Object.create(null);
-        this.column = this.createColumnFromArray(this._config.column);
+        this.column = this.createColumnFromArray(columnArr);
       }
     }
 
@@ -324,6 +328,9 @@ export class VirtualTableComponent {
   }
 
   private columnResizeAction() {
+    if (!this.showHeader) {
+      return;
+    }
     const parent = this.headerDiv.nativeElement;
     let i = 0;
     while (i < this.column.length) {

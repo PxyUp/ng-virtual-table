@@ -24,6 +24,15 @@ describe('NgVirtualTableService', () => {
   });
 
   describe('defaultComparator', () => {
+    it('should return 0', () => {
+      const answer = service.defaultComparator(4, 4);
+      expect(answer).toBe(0);
+      const answer1 = service.defaultComparator(-4, -4);
+      expect(answer1).toBe(0);
+      const answer2 = service.defaultComparator('aaa', 'aaa');
+      expect(answer).toBe(0);
+    });
+
     it('should return 1', () => {
       const answer = service.defaultComparator(4, 3);
       expect(answer).toBe(1);
@@ -224,6 +233,30 @@ describe('NgVirtualTableService', () => {
         {
           key: 'key2',
           sort: null as sortColumn,
+        },
+      ]);
+    });
+
+    it('should sort false', () => {
+      const mock1 = [
+        {
+          key: 'key',
+          sort: false,
+        },
+        {
+          key: 'key2',
+          sort: false,
+        },
+      ];
+
+      expect(service.setSortOnColumnArray('key', mock1 as any)).toEqual([
+        {
+          key: 'key',
+          sort: false,
+        },
+        {
+          key: 'key2',
+          sort: false,
         },
       ]);
     });

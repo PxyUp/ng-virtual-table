@@ -101,6 +101,8 @@
         "tsConfig": "<rootDir>/tsconfig.spec.json"
       }
     },
+    "collectCoverage": true,
+    "coverageReporters": ["json", "html"],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },

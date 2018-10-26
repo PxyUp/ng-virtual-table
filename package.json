@@ -11,10 +11,10 @@
     "ct": "git add --all && git-cz",
     "commitmsg": "commitlint -E GIT_PARAMS",
     "prepublish": "build",
-    "prepush": "yarn jest",
     "test": "jest",
     "localyarn": "yarn"
   },
+  "prepush": ["yarn jest"],
   "ngPackage": {
     "lib": {
       "entryFile": "./lib/public_api.ts"

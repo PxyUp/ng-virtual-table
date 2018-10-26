@@ -4,12 +4,14 @@ export interface VirtualTableItem {
   [key: string]: any;
 }
 
+export type sortColumn = 'asc' | 'desc' | null | false;
+
 export interface VirtualTableColumn {
   name?: string;
   key: string;
   func?: (item: VirtualTableItem) => any;
   comp?: (a: any, b: any) => number;
-  sort?: 'asc' | 'desc' | null | false;
+  sort?: sortColumn;
   resizable?: boolean;
   draggable?: boolean;
   component?: VirtualTableColumnComponent | false;

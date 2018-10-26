@@ -11,6 +11,8 @@
     "ct": "git add --all && git-cz",
     "commitmsg": "commitlint -E GIT_PARAMS",
     "prepublish": "build",
+    "prepush": "yarn jest",
+    "test": "jest",
     "localyarn": "yarn"
   },
   "ngPackage": {
@@ -18,24 +20,34 @@
       "entryFile": "./lib/public_api.ts"
     },
     "cssUrl": "inline",
-    "whitelistedNonPeerDependencies": ["angular", "rxjs", "ng-dynamic-component"]
+    "whitelistedNonPeerDependencies": [
+      "angular",
+      "rxjs",
+      "ng-dynamic-component"
+    ]
   },
   "devDependencies": {
     "@angular/animations": "^7.0.0",
     "@angular/cdk": "^7.0.0",
-    "@angular/material": "^7.0.0",
     "@angular/cli": "^7.0.0",
     "@angular/common": "^7.0.0",
     "@angular/compiler": "^7.0.0",
     "@angular/compiler-cli": "^7.0.0",
     "@angular/core": "^7.0.0",
     "@angular/forms": "^7.0.0",
+    "@angular/material": "^7.0.0",
     "@angular/platform-browser": "^7.0.0",
+    "@angular/platform-browser-dynamic": "^7.0.1",
     "@commitlint/config-conventional": "^7.1.2",
+    "@types/jest": "^23.3.7",
     "commitizen": "^3.0.4",
+    "jest": "^23.6.0",
+    "jest-preset-angular": "^6.0.1",
     "ng-packagr": "^4.3.1",
+    "prepush": "^3.1.11",
     "rxjs": "^6.3.3",
     "scss-bundle": "^2.4.0",
+    "ts-jest": "^23.10.4",
     "tsickle": "^0.33.0",
     "typescript": "^3.1.3",
     "yarn": "^1.10.1",
@@ -47,9 +59,15 @@
     }
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"],
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
     "rules": {
-      "header-max-length": [2, "always", 80]
+      "header-max-length": [
+        2,
+        "always",
+        80
+      ]
     }
   },
   "keywords": [
@@ -66,13 +84,30 @@
     "life-cycle"
   ],
   "peerDependencies": {
-    "@angular/core": "^7.0.0",
     "@angular/animations": "^7.0.0",
     "@angular/cdk": "^7.0.0",
+    "@angular/core": "^7.0.0",
     "@angular/forms": "^7.0.0",
     "@angular/material": "^7.0.0"
   },
   "dependencies": {
     "ng-dynamic-component": "^4.0.0"
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "<rootDir>/tsconfig.spec.json"
+      }
+    },
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "preset": "jest-preset-angular",
+    "setupTestFrameworkScriptFile": "<rootDir>/setupJest.ts",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/appTest/",
+      "/docs"
+    ]
   }
 }

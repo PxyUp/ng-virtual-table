@@ -27,6 +27,7 @@ import {
   VirtualTableColumnInternal,
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { NgVirtualTableService } from '../services/ngVirtualTable.service';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -80,43 +81,14 @@ export class VirtualTableComponent {
 
   private _sort$: Observable<string> = this.sort$.asObservable();
 
+  constructor(private service: NgVirtualTableService) {}
+
+  getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
+    return this.service.getElement(item, func);
+  }
+
   applySort(column: string) {
-    this.column = this.column.map((item) => {
-      if (item.key !== column) {
-        return {
-          ...item,
-          sort: item.sort === false ? false : null,
-        };
-      }
-
-      if (item.sort === false) {
-        return {
-          ...item,
-          sort: false,
-        };
-      }
-
-      if (item.sort === null) {
-        return {
-          ...item,
-          sort: 'asc',
-        };
-      }
-
-      if (item.sort === 'asc') {
-        return {
-          ...item,
-          sort: 'desc',
-        };
-      }
-
-      if (item.sort === 'desc') {
-        return {
-          ...item,
-          sort: null,
-        };
-      }
-    }) as Array<VirtualTableColumn>;
+    this.column = this.service.setSortOnColumnArray(column, this.column);
     this.sort$.next(column);
   }
 
@@ -166,16 +138,16 @@ export class VirtualTableComponent {
           if (sortColumn.sort === 'asc') {
             sliceStream.sort((a, b) =>
               sortColumn.comp(
-                this.getElement(a, _sortColumn.func),
-                this.getElement(b, _sortColumn.func),
+                this.service.getElement(a, _sortColumn.func),
+                this.service.getElement(b, _sortColumn.func),
               ),
             );
           } else {
             sliceStream.sort(
               (a, b) =>
                 -sortColumn.comp(
-                  this.getElement(a, _sortColumn.func),
-                  this.getElement(b, _sortColumn.func),
+                  this.service.getElement(a, _sortColumn.func),
+                  this.service.getElement(b, _sortColumn.func),
                 ),
             );
           }
@@ -183,16 +155,19 @@ export class VirtualTableComponent {
           return [filterString, sliceStream];
         }),
         map(([filterString, stream]) => {
-          const sliceStream = stream.slice();
           if (!filterString) {
-            return sliceStream;
+            return stream;
           }
           const filter = filterString.toLocaleLowerCase();
 
-          const filterSliceStream = sliceStream.filter((item: VirtualTableItem) =>
+          const filterSliceStream = stream.filter((item: VirtualTableItem) =>
             this.column.some(
               (e) =>
-                this.getElement(item, e.func).toString().toLocaleLowerCase().indexOf(filter) > -1,
+                this.service
+                  .getElement(item, e.func)
+                  .toString()
+                  .toLocaleLowerCase()
+                  .indexOf(filter) > -1,
             ),
           );
           return filterSliceStream;
@@ -224,53 +199,15 @@ export class VirtualTableComponent {
     if (!arr || arr.length === 0) {
       return;
     }
-    this._headerWasSet = true;
-    const columnArr = arr.map((item: VirtualTableColumn) => {
-      const columnItem = this.createColumnFromConfigColumn(item);
-
-      if (this._headerDict[columnItem.key]) {
-        throw Error(`Column key=${columnItem.key} already declare`);
+    const columnArr = this.service.createColumnFromArray(arr);
+    columnArr.forEach((column) => {
+      if (this._headerDict[column.key]) {
+        throw Error(`Column key=${column.key} already declare`);
       }
-      this._headerDict[columnItem.key] = columnItem;
-
-      return columnItem;
+      this._headerDict[column.key] = column;
     });
-
+    this._headerWasSet = true;
     return columnArr;
-  }
-
-  public getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
-    return func.call(this, item);
-  }
-
-  private createColumnFromConfigColumn(
-    item: string | VirtualTableColumn,
-  ): VirtualTableColumnInternal {
-    if (typeof item === 'string') {
-      return {
-        name: item,
-        key: item,
-        func: (e) => e[item],
-        comp: this.defaultComparator,
-        sort: null,
-        resizable: true,
-        component: false,
-        draggable: true,
-      };
-    }
-    if (!item.key) {
-      throw Error(`Column key for ${item} must be exist`);
-    }
-    return {
-      name: item.name || item.key,
-      key: item.key,
-      func: typeof item.func === 'function' ? item.func : (e) => e[item.key],
-      comp: typeof item.comp === 'function' ? item.comp : this.defaultComparator,
-      sort: item.sort === false || item.sort ? item.sort : null,
-      resizable: item.resizable === false || item.resizable ? item.resizable : true,
-      component: item.component ? item.component : false,
-      draggable: item.draggable === false || item.draggable ? item.draggable : true,
-    };
   }
 
   ngOnDestroy() {
@@ -279,16 +216,6 @@ export class VirtualTableComponent {
 
   clickItem(item: VirtualTableItem) {
     if (typeof this.onRowClick === 'function') this.onRowClick(item);
-  }
-
-  private defaultComparator(a: any, b: any): number {
-    if (a > b) {
-      return 1;
-    }
-    if (a < b) {
-      return -1;
-    }
-    return 0;
   }
 
   resizeStart(column: VirtualTableColumnInternal, index: number) {
@@ -353,21 +280,8 @@ export class VirtualTableComponent {
     moveItemInArray(this.column, event.previousIndex, event.currentIndex);
   }
 
-  transformDynamicInput(input: Object, item: VirtualTableItem): Object {
-    const answer = Object.create(null);
-
-    if (!input) {
-      return answer;
-    }
-    Object.keys(input).forEach((key) => {
-      if (typeof input[key] === 'function') {
-        answer[key] = this.getElement(item, input[key]);
-        return;
-      }
-      answer[key] = input[key];
-    });
-
-    return answer;
+  transformDynamicInput(input: Object, item: VirtualTableItem) {
+    return this.service.transformDynamicInput(input, item);
   }
 
   mouseDownBlock(event: MouseEvent) {

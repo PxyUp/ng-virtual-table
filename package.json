@@ -14,7 +14,11 @@
     "test": "jest",
     "localyarn": "yarn"
   },
-  "prepush": ["yarn jest"],
+  "prepush": {
+    "tasks": ["yarn test"],
+    "onDirtyState": "ask",
+    "coloredOuput": true
+  },
   "ngPackage": {
     "lib": {
       "entryFile": "./lib/public_api.ts"

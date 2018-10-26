@@ -14,11 +14,9 @@
     "test": "jest",
     "localyarn": "yarn"
   },
-  "prepush": {
-    "tasks": ["yarn test"],
-    "onDirtyState": "ask",
-    "coloredOuput": true
-  },
+  "pre-push": [
+    "yarn test"
+  ],
   "ngPackage": {
     "lib": {
       "entryFile": "./lib/public_api.ts"
@@ -48,7 +46,7 @@
     "jest": "^23.6.0",
     "jest-preset-angular": "^6.0.1",
     "ng-packagr": "^4.3.1",
-    "prepush": "^3.1.11",
+    "pre-push": "^0.1.1",
     "rxjs": "^6.3.3",
     "scss-bundle": "^2.4.0",
     "ts-jest": "^23.10.4",

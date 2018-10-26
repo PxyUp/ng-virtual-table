@@ -14,19 +14,13 @@
     "test": "jest",
     "localyarn": "yarn"
   },
-  "pre-push": [
-    "test"
-  ],
+  "pre-push": ["test"],
   "ngPackage": {
     "lib": {
       "entryFile": "./lib/public_api.ts"
     },
     "cssUrl": "inline",
-    "whitelistedNonPeerDependencies": [
-      "angular",
-      "rxjs",
-      "ng-dynamic-component"
-    ]
+    "whitelistedNonPeerDependencies": ["angular", "rxjs", "ng-dynamic-component"]
   },
   "devDependencies": {
     "@angular/animations": "^7.0.0",
@@ -61,15 +55,9 @@
     }
   },
   "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
+    "extends": ["@commitlint/config-conventional"],
     "rules": {
-      "header-max-length": [
-        2,
-        "always",
-        80
-      ]
+      "header-max-length": [2, "always", 80]
     }
   },
   "keywords": [
@@ -99,19 +87,17 @@
     "globals": {
       "ts-jest": {
         "tsConfig": "<rootDir>/tsconfig.spec.json"
-      }
+      },
+      "__TRANSFORM_HTML__": true
     },
     "collectCoverage": true,
     "coverageReporters": ["json", "html"],
     "transform": {
-      "^.+\\.tsx?$": "ts-jest"
+      "^.+\\.(ts|html)$": "jest-preset-angular/preprocessor.js"
     },
+    "transformIgnorePatterns": ["node_modules/(?!@ngrx)"],
     "preset": "jest-preset-angular",
     "setupTestFrameworkScriptFile": "<rootDir>/setupJest.ts",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/appTest/",
-      "/docs"
-    ]
+    "testPathIgnorePatterns": ["/node_modules/", "/appTest/", "/docs"]
   }
 }

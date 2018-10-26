@@ -22,8 +22,10 @@ imports: [NgVirtualTableModule.forRoot()],
 ```html
 <ng-virtual-table [dataSource]="dataSource"></ng-virtual-table>
 ```
+📺 [STACKBLITZ](https://stackblitz.com/edit/angular-i7mm4w)
 
 📺 [Demo](https://pxyup.github.io/ng-virtual-table)
+
 
 [![NPM](https://nodei.co/npm/ng-virtual-table.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/ng-virtual-table/)
 

@@ -15,7 +15,7 @@
     "localyarn": "yarn"
   },
   "pre-push": [
-    "yarn test"
+    "test"
   ],
   "ngPackage": {
     "lib": {

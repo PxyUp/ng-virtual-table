@@ -63,6 +63,7 @@ export interface VirtualTableColumn {
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>; // if config not provide will be auto generate column
   filter?: boolean; // default false
+  header?: boolean; // default true
 }
 
 export interface VirtualTableColumnComponent {

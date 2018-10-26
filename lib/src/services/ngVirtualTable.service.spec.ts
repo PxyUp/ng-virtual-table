@@ -25,7 +25,7 @@ describe('NgVirtualTableService', () => {
 
   describe('defaultComparator', () => {
     it('should return 1', () => {
-      const answer = service.defaultComparator(4, 5);
+      const answer = service.defaultComparator(4, 3);
       expect(answer).toBe(1);
       const answer1 = service.defaultComparator(-4, -5);
       expect(answer1).toBe(1);

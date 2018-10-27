@@ -29,6 +29,7 @@ import {
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -39,7 +40,7 @@ import { NgVirtualTableService } from '../services/ngVirtualTable.service';
 export class VirtualTableComponent {
   private _config: VirtualTableConfig;
 
-  private _oldWidth: number;
+  public _oldWidth: number;
 
   private _headerWasSet = false;
 
@@ -50,6 +51,8 @@ export class VirtualTableComponent {
   @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
 
   @ViewChild('headerDiv') headerDiv: ElementRef;
+
+  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
   @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
@@ -96,6 +99,10 @@ export class VirtualTableComponent {
       }
     });
 
+  private dataSourceSub$: Subscription;
+
+  public dataArray: Array<VirtualTableItem | number | string | boolean> = [];
+
   constructor(private service: NgVirtualTableService, private cdr: ChangeDetectorRef) {}
 
   getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
@@ -126,6 +133,10 @@ export class VirtualTableComponent {
   }
 
   applyDatasource(obs: Observable<Array<VirtualTableItem | number | string | boolean>>) {
+    if (this.dataSourceSub$) {
+      this.dataSourceSub$.unsubscribe();
+    }
+
     this._dataStream = combineLatest(
       obs,
       this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
@@ -166,9 +177,6 @@ export class VirtualTableComponent {
         return [filterString, sliceStream];
       }),
       map(([filterString, stream]) => {
-        if (!filterString) {
-          return stream;
-        }
         return this.filterArrayByString(filterString, stream, this.column);
       }),
       publishBehavior([]),
@@ -177,7 +185,11 @@ export class VirtualTableComponent {
     );
 
     obs
-      .pipe(filter(() => !this._headerWasSet && (!this._config || !this._config.column)), take(1))
+      .pipe(
+        filter(() => !this._headerWasSet && (!this._config || !this._config.column)),
+        take(1),
+        takeUntil(this._destroyed$),
+      )
       .subscribe((stream: Array<VirtualTableItem>) => {
         const setOfColumn = new Set();
         stream.forEach((e) => Object.keys(e).forEach((key) => setOfColumn.add(key)));
@@ -186,7 +198,7 @@ export class VirtualTableComponent {
         this.cdr.detectChanges();
       });
 
-    this._dataStream.pipe(skip(1), take(1)).subscribe(() => {
+    this._dataStream.pipe(skip(1), take(1), takeUntil(this._destroyed$)).subscribe(() => {
       this._columnsSet$.next();
     });
 
@@ -194,6 +206,11 @@ export class VirtualTableComponent {
       map((data) => !data.length),
       takeUntil(this._destroyed$),
     );
+
+    this.dataSourceSub$ = this._dataStream.pipe(takeUntil(this._destroyed$)).subscribe((stream) => {
+      this.dataArray = stream;
+      this.cdr.detectChanges();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -213,6 +230,9 @@ export class VirtualTableComponent {
     arr: Array<VirtualTableItem | number | string | boolean>,
     column: Array<VirtualTableColumn>,
   ): Array<VirtualTableItem | number | string | boolean> {
+    if (!str) {
+      return arr;
+    }
     const filterString = str.toLocaleLowerCase();
 
     const filterSliceStream = arr.filter((item: VirtualTableItem) =>
@@ -253,6 +273,9 @@ export class VirtualTableComponent {
   ngOnDestroy() {
     this._destroyed$.next();
     this._columnSubs$.unsubscribe();
+    if (this.dataSourceSub$) {
+      this.dataSourceSub$.unsubscribe();
+    }
   }
 
   clickItem(item: VirtualTableItem) {

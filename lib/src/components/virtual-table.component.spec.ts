@@ -115,7 +115,7 @@ describe('VirtualTableComponent', () => {
           dataSource: new SimpleChange(null, component.dataSource, false),
         });
         fixture.detectChanges();
-        tick(1);
+
         const header = fixture.nativeElement.querySelector('.header');
 
         expect(header).toBe(null);
@@ -142,7 +142,6 @@ describe('VirtualTableComponent', () => {
           dataSource: new SimpleChange(null, component.dataSource, false),
         });
         fixture.detectChanges();
-        tick(1);
         const header = fixture.nativeElement.querySelector('.header');
 
         expect(header).not.toBe(null);

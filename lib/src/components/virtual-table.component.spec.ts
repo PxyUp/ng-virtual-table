@@ -270,7 +270,7 @@ describe('VirtualTableComponent', () => {
         width: 55,
         activeResize: true,
       } as VirtualTableColumnInternal;
-      component.resizeEnd(column, 0);
+      component.resizeEnd(column);
       expect(column).toEqual({
         width: 55,
         activeResize: false,

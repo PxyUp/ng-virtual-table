@@ -110,6 +110,6 @@
     "transformIgnorePatterns": ["node_modules/(?!@ngrx)"],
     "preset": "jest-preset-angular",
     "setupTestFrameworkScriptFile": "<rootDir>/setupJest.ts",
-    "testPathIgnorePatterns": ["/node_modules/", "/appTest/", "/docs"]
+    "testPathIgnorePatterns": ["/dist/", "/node_modules/", "/appTest/", "/docs"]
   }
 }

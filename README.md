@@ -3,6 +3,12 @@
 Angular 7 virtual scroll table with support dynamic component, draggable, filtering, sorting, resizable and custom config column
 
 
+[![Travis CI](https://img.shields.io/travis/PxyUp/ng-virtual-table/master.svg?maxAge=2592000)](https://travis-ci.org/PxyUp/ng-virtual-table)
+[![Coverage](https://img.shields.io/codecov/c/github/PxyUp/ng-virtual-table.svg?maxAge=2592000)](https://codecov.io/gh/PxyUp/ng-virtual-table)
+[![Npm](https://img.shields.io/npm/v/ng-virtual-table.svg?maxAge=2592000)](https://badge.fury.io/js/ng-virtual-table)
+[![Npm Downloads](https://img.shields.io/npm/dt/ng-virtual-table.svg?maxAge=2592000)](https://www.npmjs.com/package/ng-virtual-table)
+[![Licence](https://img.shields.io/npm/l/ng-virtual-table.svg?maxAge=2592000)](https://github.com/PxyUp/ng-virtual-table/blob/master/LICENSE)
+
 ## Install and Use
 
 ```bash

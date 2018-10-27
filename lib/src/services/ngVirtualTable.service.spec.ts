@@ -221,6 +221,81 @@ describe('NgVirtualTableService', () => {
           },
         }),
       ).toEqual(mock2);
+
+      let mock3 = {
+        name: 'Full Name',
+        key: 'age2',
+        func: expect.any(Function),
+        comp: service.defaultComparator,
+        sort: null as sortColumn,
+        resizable: false,
+        component: {
+          componentConstructor: InfoComponent,
+          inputs: {
+            name: expect.any(Function),
+          },
+        },
+        draggable: false,
+      };
+      expect(
+        service.createColumnFromConfigColumn({
+          key: 'age2',
+          name: 'Full Name',
+          resizable: false,
+          draggable: false,
+          func: service.defaultGetter.bind(null),
+          comp: service.defaultComparator,
+          component: {
+            componentConstructor: InfoComponent,
+            inputs: {
+              name: (e: any) => e.name,
+            },
+          },
+        }),
+      ).toEqual(mock3);
+
+      let mock4 = {
+        name: 'Full Name',
+        key: 'age2',
+        func: expect.any(Function),
+        comp: service.defaultComparator,
+        resizable: false,
+        draggable: false,
+        sort: false,
+        component: false,
+      };
+      expect(
+        service.createColumnFromConfigColumn({
+          key: 'age2',
+          name: 'Full Name',
+          resizable: false,
+          draggable: false,
+          sort: false,
+          func: service.defaultGetter.bind(null),
+          comp: service.defaultComparator,
+        }),
+      ).toEqual(mock4);
+
+      let mock5 = {
+        name: 'age2',
+        key: 'age2',
+        func: expect.any(Function),
+        comp: service.defaultComparator,
+        resizable: false,
+        draggable: false,
+        sort: false,
+        component: false,
+      };
+      expect(
+        service.createColumnFromConfigColumn({
+          key: 'age2',
+          resizable: false,
+          draggable: false,
+          sort: false,
+          func: service.defaultGetter.bind(null),
+          comp: service.defaultComparator,
+        }),
+      ).toEqual(mock5);
     });
   });
 
@@ -269,6 +344,20 @@ describe('NgVirtualTableService', () => {
           sort: null as sortColumn,
         },
       ]);
+
+      const mock3 = [
+        {
+          key: 'key',
+          sort: null as sortColumn,
+        },
+      ];
+
+      expect(service.setSortOnColumnArray('key', mock3)).toEqual([
+        {
+          key: 'key',
+          sort: 'asc',
+        },
+      ]);
     });
 
     it('should sort asc', () => {
@@ -315,6 +404,20 @@ describe('NgVirtualTableService', () => {
           sort: null as sortColumn,
         },
       ]);
+
+      const mock3 = [
+        {
+          key: 'key',
+          sort: 'asc' as sortColumn,
+        },
+      ];
+
+      expect(service.setSortOnColumnArray('key', mock3)).toEqual([
+        {
+          key: 'key',
+          sort: 'desc',
+        },
+      ]);
     });
 
     it('should sort false', () => {
@@ -336,6 +439,20 @@ describe('NgVirtualTableService', () => {
         },
         {
           key: 'key2',
+          sort: false,
+        },
+      ]);
+
+      const mock3 = [
+        {
+          key: 'key',
+          sort: false as sortColumn,
+        },
+      ];
+
+      expect(service.setSortOnColumnArray('key', mock3)).toEqual([
+        {
+          key: 'key',
           sort: false,
         },
       ]);
@@ -383,6 +500,20 @@ describe('NgVirtualTableService', () => {
         {
           key: 'key2',
           sort: null as sortColumn,
+        },
+      ]);
+
+      const mock3 = [
+        {
+          key: 'key',
+          sort: 'desc' as sortColumn,
+        },
+      ];
+
+      expect(service.setSortOnColumnArray('key', mock3)).toEqual([
+        {
+          key: 'key',
+          sort: null,
         },
       ]);
     });

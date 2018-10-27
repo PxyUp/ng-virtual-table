@@ -94,6 +94,7 @@
       "__TRANSFORM_HTML__": true
     },
     "coverageDirectory": "<rootDir>/coverage",
+    "collectCoverageFrom": ["lib/src/**/*.ts", "!lib/src/ngVirtualTable.module.ts"],
     "coverageThreshold": {
       "global": {
         "branches": 70,

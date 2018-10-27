@@ -135,7 +135,7 @@ describe('VirtualTableComponent', () => {
     });
   });
 
-  describe('isEmptySubject', () => {
+  describe('isEmptySubject$', () => {
     it('should emit false when datasource not  empty', () => {
       const dataSource = of(Array(5).fill(0).map((e, index) => index));
 
@@ -693,6 +693,16 @@ describe('VirtualTableComponent', () => {
       component.column = config.column;
 
       expect(component._sortAfterConfigWasSet()).toEqual('name');
+    });
+  });
+
+  describe('mouseDownBlock', () => {
+    it('should execute on event', () => {
+      const ev = {
+        stopImmediatePropagation: jest.fn(),
+      } as any;
+      component.mouseDownBlock(ev);
+      expect(ev.stopImmediatePropagation).toBeCalled();
     });
   });
 

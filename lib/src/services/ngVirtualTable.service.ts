@@ -18,6 +18,10 @@ export class NgVirtualTableService {
     return 0;
   }
 
+  public defaultGetter(item: VirtualTableItem, e: any) {
+    return e[item.key];
+  }
+
   public createColumnFromConfigColumn(
     item: string | VirtualTableColumn,
   ): VirtualTableColumnInternal {
@@ -34,12 +38,12 @@ export class NgVirtualTableService {
       };
     }
     if (!item.key) {
-      throw Error(`Column key for ${item} must be exist`);
+      throw Error(`Column key is required`);
     }
     return {
       name: item.name || item.key,
       key: item.key,
-      func: typeof item.func === 'function' ? item.func : (e) => e[item.key],
+      func: typeof item.func === 'function' ? item.func : this.defaultGetter.bind(null, item),
       comp: typeof item.comp === 'function' ? item.comp : this.defaultComparator,
       sort: item.sort === false || item.sort ? item.sort : null,
       resizable: item.resizable === false || item.resizable ? item.resizable : true,

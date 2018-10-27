@@ -91,7 +91,9 @@ export class VirtualTableComponent {
   private _columnSubs$: Subscription = this._columnsSetObs$
     .pipe(takeUntil(this._destroyed$))
     .subscribe(() => {
-      this.columnResizeAction();
+      if (this.showHeader) {
+        this.columnResizeAction();
+      }
     });
 
   constructor(private service: NgVirtualTableService, private cdr: ChangeDetectorRef) {}
@@ -119,8 +121,8 @@ export class VirtualTableComponent {
     if (Array.isArray(columnArr)) {
       this._headerDict = Object.create(null);
       this.column = this.createColumnFromArray(columnArr);
-      this.cdr.detectChanges();
     }
+    this.cdr.detectChanges();
   }
 
   applyDatasource(obs: Observable<Array<VirtualTableItem | number | string | boolean>>) {
@@ -286,9 +288,6 @@ export class VirtualTableComponent {
   }
 
   private columnResizeAction() {
-    if (!this.showHeader) {
-      return;
-    }
     const parent = this.headerDiv.nativeElement;
     let i = 0;
     while (i < this.column.length) {

@@ -89,7 +89,89 @@ describe('NgVirtualTableService', () => {
         draggable: true,
       };
 
-      expect(createMock).toEqual(service.createColumnFromConfigColumn('key'));
+      expect(service.createColumnFromConfigColumn('key')).toEqual(createMock);
+    });
+
+    it('should use `func` for get data', () => {
+      function getData(item: any) {
+        return item;
+      }
+      let mock2 = {
+        name: 'Full Name',
+        key: 'age2',
+        func: getData,
+        comp: service.defaultComparator,
+        sort: null as sortColumn,
+        resizable: false,
+        component: {
+          componentConstructor: InfoComponent,
+          inputs: {
+            name: expect.any(Function),
+          },
+        },
+        draggable: true,
+      };
+      expect(
+        service.createColumnFromConfigColumn({
+          key: 'age2',
+          name: 'Full Name',
+          resizable: false,
+          func: getData,
+          comp: service.defaultComparator,
+          component: {
+            componentConstructor: InfoComponent,
+            inputs: {
+              name: (e: any) => e.name,
+            },
+          },
+        }),
+      ).toEqual(mock2);
+    });
+
+    it('should create default for `func`', () => {
+      let mock2 = {
+        name: 'Full Name',
+        key: 'age2',
+        func: expect.any(Function),
+        comp: service.defaultComparator,
+        sort: null as sortColumn,
+        resizable: false,
+        component: {
+          componentConstructor: InfoComponent,
+          inputs: {
+            name: expect.any(Function),
+          },
+        },
+        draggable: true,
+      };
+      expect(
+        service.createColumnFromConfigColumn({
+          key: 'age2',
+          name: 'Full Name',
+          resizable: false,
+          func: null,
+          comp: expect.any(Function),
+          component: {
+            componentConstructor: InfoComponent,
+            inputs: {
+              name: (e: any) => e.name,
+            },
+          },
+        }),
+      ).toEqual(mock2);
+    });
+
+    it('should throw error', () => {
+      try {
+        expect(
+          service.createColumnFromConfigColumn({
+            name: 'Full name',
+            sort: false,
+          } as any),
+        ).toThrowError(Error('Column key is required'));
+      } catch (e) {
+        expect(e.message).toBe('Column key is required');
+      }
     });
 
     it('should create item from object', () => {
@@ -103,13 +185,13 @@ describe('NgVirtualTableService', () => {
         component: false,
         draggable: true,
       };
-      expect(mock).toEqual(
+      expect(
         service.createColumnFromConfigColumn({
           key: 'name',
           name: 'Full name',
           sort: false,
         }),
-      );
+      ).toEqual(mock);
 
       let mock2 = {
         name: 'Full Name',
@@ -131,7 +213,7 @@ describe('NgVirtualTableService', () => {
           key: 'age2',
           name: 'Full Name',
           resizable: false,
-          func: expect.any(Function),
+          func: service.defaultGetter.bind(null),
           comp: service.defaultComparator,
           component: {
             componentConstructor: InfoComponent,
@@ -308,6 +390,17 @@ describe('NgVirtualTableService', () => {
     });
   });
 
+  describe('defaultGetter()', () => {
+    it('should return item.key', () => {
+      const item = {
+        key: 'name',
+        name: 'title',
+      };
+
+      expect(service.defaultGetter(item, item)).toBe('title');
+    });
+  });
+
   describe('transformDynamicInput', () => {
     it('should translate input', () => {
       const mock = {};
@@ -316,6 +409,7 @@ describe('NgVirtualTableService', () => {
         name: 'title',
         label: 'label',
       };
+      expect(service.transformDynamicInput(null, mockItem)).toEqual({});
 
       expect(service.transformDynamicInput(mock, mockItem)).toEqual({});
 

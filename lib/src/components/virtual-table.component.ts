@@ -61,7 +61,7 @@ export class VirtualTableComponent {
 
   @Input() onRowClick: (item: VirtualTableItem) => void;
 
-  filterControl: FormControl = new FormControl('');
+  public filterControl: FormControl = new FormControl('');
 
   private _headerDict: { [key: string]: VirtualTableColumnInternal } = Object.create(null);
 
@@ -80,11 +80,13 @@ export class VirtualTableComponent {
   private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
     .pipe(debounceTime(350), startWith(null), distinctUntilChanged(), takeUntil(this._destroyed$));
 
-  private _sort$: Observable<string> = this.sort$.asObservable();
+  private _sort$: Observable<string> = this.sort$.asObservable().pipe(takeUntil(this._destroyed$));
 
   private _columnsSet$: Subject<void> = new Subject();
 
-  private _columnsSetObs$: Observable<void> = this._columnsSet$.asObservable();
+  private _columnsSetObs$: Observable<void> = this._columnsSet$
+    .asObservable()
+    .pipe(takeUntil(this._destroyed$));
 
   private _columnSubs$: Subscription = this._columnsSetObs$
     .pipe(takeUntil(this._destroyed$))
@@ -121,7 +123,7 @@ export class VirtualTableComponent {
     }
   }
 
-  applyDatasource(obs: Observable<Array<VirtualTableItem>>) {
+  applyDatasource(obs: Observable<Array<VirtualTableItem | number | string | boolean>>) {
     this._dataStream = combineLatest(
       obs,
       this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
@@ -182,11 +184,7 @@ export class VirtualTableComponent {
     );
 
     obs
-      .pipe(
-        filter(() => !this._headerWasSet && (!this._config || !this._config.column)),
-        take(1),
-        takeUntil(this._destroyed$),
-      )
+      .pipe(filter(() => !this._headerWasSet && (!this._config || !this._config.column)), take(1))
       .subscribe((stream: Array<VirtualTableItem>) => {
         const setOfColumn = new Set();
         stream.forEach((e) => Object.keys(e).forEach((key) => setOfColumn.add(key)));
@@ -199,7 +197,10 @@ export class VirtualTableComponent {
       this._columnsSet$.next();
     });
 
-    this.isEmptySubject$ = this._dataStream.pipe(map((data) => !data.length));
+    this.isEmptySubject$ = this._dataStream.pipe(
+      map((data) => !data.length),
+      takeUntil(this._destroyed$),
+    );
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -210,11 +211,11 @@ export class VirtualTableComponent {
 
     if ('dataSource' in changes) {
       const newDataSource = changes.dataSource.currentValue as Observable<Array<VirtualTableItem>>;
-      this.applyDatasource(newDataSource);
+      this.applyDatasource(newDataSource.pipe(takeUntil(this._destroyed$)));
     }
   }
 
-  private _sortAfterConfigWasSet() {
+  public _sortAfterConfigWasSet() {
     const columnPreSort = this.column.find((e) => e.sort && e.sort !== null);
     if (columnPreSort) {
       return columnPreSort.key;
@@ -241,9 +242,7 @@ export class VirtualTableComponent {
 
   ngOnDestroy() {
     this._destroyed$.next();
-    if (this._columnSubs$) {
-      this._columnSubs$.unsubscribe();
-    }
+    this._columnSubs$.unsubscribe();
   }
 
   clickItem(item: VirtualTableItem) {

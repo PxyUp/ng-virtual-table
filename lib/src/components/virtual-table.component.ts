@@ -5,10 +5,10 @@ import {
   SimpleChanges,
   ViewChild,
   ElementRef,
+  ChangeDetectorRef,
 } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest } from 'rxjs';
+import { Observable, EMPTY, Subject, combineLatest, Subscription } from 'rxjs';
 import {
-  tap,
   map,
   startWith,
   debounceTime,
@@ -17,6 +17,7 @@ import {
   publishBehavior,
   refCount,
   take,
+  filter,
   skip,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -40,6 +41,8 @@ export class VirtualTableComponent {
 
   private _oldWidth: number;
 
+  private _headerWasSet = false;
+
   public filterIsOpen = false;
 
   @Input() itemSize = 25;
@@ -58,7 +61,7 @@ export class VirtualTableComponent {
 
   @Input() onRowClick: (item: VirtualTableItem) => void;
 
-  filterControl: FormControl = new FormControl('');
+  public filterControl: FormControl = new FormControl('');
 
   private _headerDict: { [key: string]: VirtualTableColumnInternal } = Object.create(null);
 
@@ -70,8 +73,6 @@ export class VirtualTableComponent {
 
   private _destroyed$ = new Subject<void>();
 
-  private _headerWasSet = false;
-
   public showHeader = true;
 
   public isEmptySubject$: Observable<boolean>;
@@ -79,9 +80,21 @@ export class VirtualTableComponent {
   private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
     .pipe(debounceTime(350), startWith(null), distinctUntilChanged(), takeUntil(this._destroyed$));
 
-  private _sort$: Observable<string> = this.sort$.asObservable();
+  private _sort$: Observable<string> = this.sort$.asObservable().pipe(takeUntil(this._destroyed$));
 
-  constructor(private service: NgVirtualTableService) {}
+  private _columnsSet$: Subject<void> = new Subject();
+
+  private _columnsSetObs$: Observable<void> = this._columnsSet$
+    .asObservable()
+    .pipe(takeUntil(this._destroyed$));
+
+  private _columnSubs$: Subscription = this._columnsSetObs$
+    .pipe(takeUntil(this._destroyed$))
+    .subscribe(() => {
+      this.columnResizeAction();
+    });
+
+  constructor(private service: NgVirtualTableService, private cdr: ChangeDetectorRef) {}
 
   getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
     return this.service.getElement(item, func);
@@ -92,100 +105,117 @@ export class VirtualTableComponent {
     this.sort$.next(column);
   }
 
+  headerItemDragStarted() {
+    (this.headerDiv.nativeElement as HTMLElement).classList.add('cdk-drop-list-dragging');
+  }
+
+  headerItemDragFinished() {
+    (this.headerDiv.nativeElement as HTMLElement).classList.remove('cdk-drop-list-dragging');
+  }
+
+  applyConfig(config: VirtualTableConfig) {
+    const columnArr = config.column;
+    this.showHeader = config.header === false ? false : true;
+    if (Array.isArray(columnArr)) {
+      this._headerDict = Object.create(null);
+      this.column = this.createColumnFromArray(columnArr);
+      this.cdr.detectChanges();
+    }
+  }
+
+  applyDatasource(obs: Observable<Array<VirtualTableItem | number | string | boolean>>) {
+    this._dataStream = combineLatest(
+      obs,
+      this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
+      this.filter$,
+    ).pipe(
+      map(([stream, sort, filterString]) => {
+        const sliceStream = stream.slice();
+
+        const sortColumn = this.column.find((e) => e.key === sort);
+
+        if (!sort || !sortColumn) {
+          return [filterString, sliceStream];
+        }
+
+        if (!sortColumn.sort) {
+          return [filterString, sliceStream];
+        }
+
+        const _sortColumn = this._headerDict[sort];
+
+        if (sortColumn.sort === 'asc') {
+          sliceStream.sort((a, b) =>
+            sortColumn.comp(
+              this.service.getElement(a, _sortColumn.func),
+              this.service.getElement(b, _sortColumn.func),
+            ),
+          );
+        } else {
+          sliceStream.sort(
+            (a, b) =>
+              -sortColumn.comp(
+                this.service.getElement(a, _sortColumn.func),
+                this.service.getElement(b, _sortColumn.func),
+              ),
+          );
+        }
+
+        return [filterString, sliceStream];
+      }),
+      map(([filterString, stream]) => {
+        if (!filterString) {
+          return stream;
+        }
+        const filter = filterString.toLocaleLowerCase();
+
+        const filterSliceStream = stream.filter((item: VirtualTableItem) =>
+          this.column.some(
+            (e) =>
+              this.service.getElement(item, e.func).toString().toLocaleLowerCase().indexOf(filter) >
+              -1,
+          ),
+        );
+        return filterSliceStream;
+      }),
+      publishBehavior([]),
+      refCount(),
+      takeUntil(this._destroyed$),
+    );
+
+    obs
+      .pipe(filter(() => !this._headerWasSet && (!this._config || !this._config.column)), take(1))
+      .subscribe((stream: Array<VirtualTableItem>) => {
+        const setOfColumn = new Set();
+        stream.forEach((e) => Object.keys(e).forEach((key) => setOfColumn.add(key)));
+        const autoColumnArray = Array.from(setOfColumn);
+        this.column = this.createColumnFromArray(autoColumnArray);
+        this.cdr.detectChanges();
+      });
+
+    this._dataStream.pipe(skip(1), take(1)).subscribe(() => {
+      this._columnsSet$.next();
+    });
+
+    this.isEmptySubject$ = this._dataStream.pipe(
+      map((data) => !data.length),
+      takeUntil(this._destroyed$),
+    );
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if ('config' in changes) {
       this._config = changes.config.currentValue as VirtualTableConfig;
-      const columnArr = this._config.column;
-      this.showHeader = this._config.header === false ? false : true;
-      if (Array.isArray(columnArr)) {
-        this._headerDict = Object.create(null);
-        this.column = this.createColumnFromArray(columnArr);
-      }
+      this.applyConfig(this._config);
     }
 
     if ('dataSource' in changes) {
       const newDataSource = changes.dataSource.currentValue as Observable<Array<VirtualTableItem>>;
-      this._dataStream = combineLatest(
-        newDataSource.pipe(
-          tap((stream: Array<VirtualTableItem>) => {
-            if (!this._headerWasSet) {
-              const setOfColumn = new Set();
-              stream.forEach((e) => Object.keys(e).forEach((key) => setOfColumn.add(key)));
-              const autoColumnArray = Array.from(setOfColumn);
-              this.column = this.createColumnFromArray(autoColumnArray);
-            }
-          }),
-        ),
-        this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
-        this.filter$,
-      ).pipe(
-        debounceTime(100),
-        map(([stream, sort, filterString]) => {
-          const sliceStream = stream.slice();
-
-          const sortColumn = this.column.find((e) => e.key === sort);
-
-          if (!sort || !sortColumn) {
-            return [filterString, sliceStream];
-          }
-
-          if (!sortColumn.sort) {
-            return [filterString, sliceStream];
-          }
-
-          const _sortColumn = this._headerDict[sort];
-
-          if (sortColumn.sort === 'asc') {
-            sliceStream.sort((a, b) =>
-              sortColumn.comp(
-                this.service.getElement(a, _sortColumn.func),
-                this.service.getElement(b, _sortColumn.func),
-              ),
-            );
-          } else {
-            sliceStream.sort(
-              (a, b) =>
-                -sortColumn.comp(
-                  this.service.getElement(a, _sortColumn.func),
-                  this.service.getElement(b, _sortColumn.func),
-                ),
-            );
-          }
-
-          return [filterString, sliceStream];
-        }),
-        map(([filterString, stream]) => {
-          if (!filterString) {
-            return stream;
-          }
-          const filter = filterString.toLocaleLowerCase();
-
-          const filterSliceStream = stream.filter((item: VirtualTableItem) =>
-            this.column.some(
-              (e) =>
-                this.service
-                  .getElement(item, e.func)
-                  .toString()
-                  .toLocaleLowerCase()
-                  .indexOf(filter) > -1,
-            ),
-          );
-          return filterSliceStream;
-        }),
-        publishBehavior([]),
-        refCount(),
-        takeUntil(this._destroyed$),
-      );
-
-      this._dataStream.pipe(skip(1), take(1)).subscribe(() => {
-        this.columnResizeAction();
-      });
-
-      this.isEmptySubject$ = this._dataStream.pipe(map((data) => !data.length));
+      this.applyDatasource(newDataSource.pipe(takeUntil(this._destroyed$)));
     }
   }
 
-  private _sortAfterConfigWasSet() {
+  public _sortAfterConfigWasSet() {
     const columnPreSort = this.column.find((e) => e.sort && e.sort !== null);
     if (columnPreSort) {
       return columnPreSort.key;
@@ -212,6 +242,7 @@ export class VirtualTableComponent {
 
   ngOnDestroy() {
     this._destroyed$.next();
+    this._columnSubs$.unsubscribe();
   }
 
   clickItem(item: VirtualTableItem) {

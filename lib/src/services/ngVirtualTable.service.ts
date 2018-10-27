@@ -48,7 +48,10 @@ export class NgVirtualTableService {
     };
   }
 
-  public getElement(item: VirtualTableItem, func: (item: VirtualTableItem) => any) {
+  public getElement(
+    item: VirtualTableItem | number | string | boolean,
+    func: (item: VirtualTableItem) => any,
+  ) {
     return func.call(null, item);
   }
 

@@ -163,12 +163,10 @@ describe('NgVirtualTableService', () => {
 
     it('should throw error', () => {
       try {
-        expect(
-          service.createColumnFromConfigColumn({
-            name: 'Full name',
-            sort: false,
-          } as any),
-        ).toThrowError(Error('Column key is required'));
+        service.createColumnFromConfigColumn({
+          name: 'Full name',
+          sort: false,
+        } as any);
       } catch (e) {
         expect(e.message).toBe('Column key is required');
       }

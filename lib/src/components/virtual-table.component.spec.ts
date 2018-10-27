@@ -5,13 +5,32 @@ import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ScrollDispatchModule } from '@angular/cdk/scrolling';
+import {
+  ScrollDispatchModule,
+  CdkVirtualForOf,
+  CdkVirtualForOfContext,
+} from '@angular/cdk/scrolling';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { DynamicModule } from 'ng-dynamic-component';
-import { VirtualTableConfig, VirtualTableColumn, VirtualTableColumnInternal } from '../interfaces';
+import { VirtualTableConfig, VirtualTableColumnInternal } from '../interfaces';
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
-import { SimpleChange, DebugElement } from '@angular/core';
+import { SimpleChange, DebugElement, EmbeddedViewRef } from '@angular/core';
+
+CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
+  const count = this._data.length;
+  let i = this._viewContainerRef.length;
+  while (i--) {
+    let view = this._viewContainerRef.get(i) as EmbeddedViewRef<CdkVirtualForOfContext<any>>;
+    if (!view.destroyed) {
+      view.context.index = this._renderedRange.start + i;
+      view.context.count = count;
+      this._updateComputedContextProperties(view.context);
+      view.detectChanges();
+    }
+  }
+};
+
 describe('VirtualTableComponent', () => {
   let fixture: ComponentFixture<VirtualTableComponent>;
   let component: VirtualTableComponent;
@@ -264,6 +283,27 @@ describe('VirtualTableComponent', () => {
     });
   });
 
+  describe('filterArrayByString', () => {
+    it('should filter stream by string', () => {
+      const str = '222';
+      const config: VirtualTableConfig = {
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            sort: null,
+            func: (e) => e,
+          },
+        ],
+      };
+
+      const stream = [22222, 33333];
+      expect(
+        component.filterArrayByString(str, stream, service.createColumnFromArray(config.column)),
+      ).toEqual([22222]);
+    });
+  });
+
   describe('resizeEnd', () => {
     it('should set `false` activeResize on column', () => {
       const column = {
@@ -275,6 +315,24 @@ describe('VirtualTableComponent', () => {
         width: 55,
         activeResize: false,
       });
+    });
+
+    it('should set `false` activeResize on column and reset grabber', () => {
+      const column = {
+        width: 55,
+        activeResize: true,
+      } as VirtualTableColumnInternal;
+      const grabber = {
+        style: {
+          transform: false,
+        },
+      } as any;
+      component.resizeEnd(column, true, grabber);
+      expect(column).toEqual({
+        width: 55,
+        activeResize: false,
+      });
+      expect(grabber.style.transform).toBe('none');
     });
   });
 
@@ -706,6 +764,28 @@ describe('VirtualTableComponent', () => {
     });
   });
 
+  describe('clickItem', () => {
+    it('should execute func', () => {
+      const item = {
+        test: 5,
+      };
+
+      const onClick = jest.fn();
+
+      component.onRowClick = onClick;
+      component.clickItem(item);
+      expect(onClick).toBeCalledWith(item);
+    });
+
+    it('should return false', () => {
+      const item = {
+        test: 5,
+      };
+      component.clickItem(item);
+      expect(component.clickItem(item)).toBe(false);
+    });
+  });
+
   describe('createColumnFromArray', () => {
     it('should create column from array', () => {
       const config: VirtualTableConfig = {
@@ -722,6 +802,31 @@ describe('VirtualTableComponent', () => {
       expect(component.createColumnFromArray(config.column)).toEqual(
         service.createColumnFromArray(config.column),
       );
+    });
+
+    it('should throw error', () => {
+      const config: VirtualTableConfig = {
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            sort: 'asc',
+            func: (e) => e,
+          },
+          {
+            key: 'name',
+            name: 'Full name',
+            sort: 'asc',
+            func: (e) => e,
+          },
+        ],
+      };
+
+      try {
+        component.createColumnFromArray(config.column);
+      } catch (e) {
+        expect(e.message).toBe(`Column key=name already declare`);
+      }
     });
   });
 });

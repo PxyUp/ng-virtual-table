@@ -169,16 +169,7 @@ export class VirtualTableComponent {
         if (!filterString) {
           return stream;
         }
-        const filter = filterString.toLocaleLowerCase();
-
-        const filterSliceStream = stream.filter((item: VirtualTableItem) =>
-          this.column.some(
-            (e) =>
-              this.service.getElement(item, e.func).toString().toLocaleLowerCase().indexOf(filter) >
-              -1,
-          ),
-        );
-        return filterSliceStream;
+        return this.filterArrayByString(filterString, stream, this.column);
       }),
       publishBehavior([]),
       refCount(),
@@ -217,6 +208,26 @@ export class VirtualTableComponent {
     }
   }
 
+  public filterArrayByString(
+    str: string,
+    arr: Array<VirtualTableItem | number | string | boolean>,
+    column: Array<VirtualTableColumn>,
+  ): Array<VirtualTableItem | number | string | boolean> {
+    const filterString = str.toLocaleLowerCase();
+
+    const filterSliceStream = arr.filter((item: VirtualTableItem) =>
+      column.some(
+        (e) =>
+          this.service
+            .getElement(item, e.func)
+            .toString()
+            .toLocaleLowerCase()
+            .indexOf(filterString) > -1,
+      ),
+    );
+    return filterSliceStream;
+  }
+
   public _sortAfterConfigWasSet() {
     const columnPreSort = this.column.find((e) => e.sort && e.sort !== null);
     if (columnPreSort) {
@@ -228,9 +239,6 @@ export class VirtualTableComponent {
   createColumnFromArray(
     arr: Array<VirtualTableColumn | string>,
   ): Array<VirtualTableColumnInternal> {
-    if (!arr || arr.length === 0) {
-      return;
-    }
     const columnArr = this.service.createColumnFromArray(arr);
     columnArr.forEach((column) => {
       if (this._headerDict[column.key]) {
@@ -248,7 +256,11 @@ export class VirtualTableComponent {
   }
 
   clickItem(item: VirtualTableItem) {
-    if (typeof this.onRowClick === 'function') this.onRowClick(item);
+    if (typeof this.onRowClick === 'function') {
+      this.onRowClick(item);
+    } else {
+      return false;
+    }
   }
 
   resizeStart(column: VirtualTableColumnInternal, index: number) {

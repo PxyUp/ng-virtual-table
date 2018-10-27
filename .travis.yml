@@ -1,0 +1,22 @@
+sudo: required
+dist: trusty
+language: node_js
+cache:
+  yarn: true
+notifications:
+  email: false
+node_js: lts/*
+branches:
+  only:
+    - master
+stages:
+  - test
+  - name: deploy
+    if: branch = master and type != pull_request
+jobs:
+  include:
+    - stage: test
+      script:
+        - yarn build
+        - yarn test:ci
+        - yarn test:report

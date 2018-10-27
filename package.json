@@ -11,7 +11,6 @@
     "ct": "git add --all && git-cz",
     "pretest": "yarn cleancoverage",
     "commitmsg": "commitlint -E GIT_PARAMS",
-    "prepublish": "build",
     "test": "jest",
     "test:ci": "jest --runInBand --coverage",
     "test:report": "cd coverage && codecov",
@@ -51,7 +50,6 @@
     "ts-jest": "^23.10.4",
     "tsickle": "^0.33.0",
     "typescript": "^3.1.3",
-    "yarn": "^1.10.1",
     "zone.js": "~0.8.26"
   },
   "config": {

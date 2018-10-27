@@ -93,8 +93,6 @@
       },
       "__TRANSFORM_HTML__": true
     },
-    "collectCoverage": true,
-    "coverageReporters": ["json", "html"],
     "coverageDirectory": "<rootDir>/coverage",
     "coverageThreshold": {
       "global": {

@@ -1,6 +1,6 @@
 ## ng-virtual-table
 
-Angular 7 virtual scroll table with support dynamic component, draggable, filtering, sorting, resizable and custom config column
+Angular 7 virtual scroll table with support dynamic component, draggable, filtering, sorting, resizable and custom config for each column
 
 [![Travis CI](https://img.shields.io/travis/PxyUp/ng-virtual-table/master.svg)](https://travis-ci.org/PxyUp/ng-virtual-table)
 [![Coverage](https://img.shields.io/codecov/c/github/PxyUp/ng-virtual-table.svg)](https://codecov.io/gh/PxyUp/ng-virtual-table)

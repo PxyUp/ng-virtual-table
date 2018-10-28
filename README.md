@@ -135,22 +135,19 @@ import { VirtualTableConfig } from 'ng-virtual-table';
     ],
   };
 
-  /*
+  
 
-    export class InfoComponent implements OnInit {
-      @Input() title: string;
+@Component({
+  selector: 'app-info',
+  templateUrl: './info.component.html',
+  styleUrls: ['./info.component.scss'],
+})
+export class InfoComponent {
+  @Input() title: string;
 
-      constructor() {}
-
-      ngOnInit() {}
-
-      click(event: MouseEvent) {
-        event.stopPropagation();
-        console.log(this.title);
-      }
-    }
-
-  */
+  constructor() {}
+}
+ 
 ```
 
 ```html

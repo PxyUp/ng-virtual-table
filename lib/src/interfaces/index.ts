@@ -29,8 +29,26 @@ export interface VirtualTableColumnComponent {
   outputs?: Object;
 }
 
+export interface VirtualTablePaginator {
+  pageSize?: number;
+  pageSizeOptions?: Array<number>;
+}
+
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>;
   header?: boolean;
   filter?: boolean;
+  pagination?: VirtualTablePaginator | boolean;
+}
+
+export interface StreamWithEffect {
+  stream: Array<VirtualTableItem | number | string | boolean>;
+  effects?: {
+    filter?: string;
+    sort?: string;
+    pagination?: {
+      pageSize?: number;
+      pagIndex?: number;
+    };
+  };
 }

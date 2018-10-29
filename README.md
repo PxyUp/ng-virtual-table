@@ -67,17 +67,24 @@ export interface VirtualTableColumn {
   component?: VirtualTableColumnComponent | false; // default false (You class component must be part of entryComponents in yor Module!!!!!)
 }
 
-export interface VirtualTableConfig {
-  column?: Array<VirtualTableColumn>; // if config not provide will be auto generate column
-  filter?: boolean; // default false
-  header?: boolean; // default true
-}
-
 export interface VirtualTableColumnComponent {
   componentConstructor: Type<any>;
   inputs?: Object; // default {}
   outputs?: Object;
 }
+
+export interface VirtualTablePaginator {
+  pageSize?: number; // default 10
+  pageSizeOptions?: Array<number>; // default [5, 10, 25, 100];
+}
+
+export interface VirtualTableConfig {
+  column?: Array<VirtualTableColumn>; // if config not provide will be auto generate column
+  header?: boolean; // default false
+  filter?: boolean; // default true
+  pagination?: VirtualTablePaginator | boolean; // default false
+}
+
 
 ```
 

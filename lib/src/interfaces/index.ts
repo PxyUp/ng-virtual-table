@@ -29,8 +29,14 @@ export interface VirtualTableColumnComponent {
   outputs?: Object;
 }
 
+export interface VirtualTablePaginator {
+  pageSize: number;
+  pageSizeOptions: Array<number>;
+}
+
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>;
   header?: boolean;
   filter?: boolean;
+  pagination?: VirtualTablePaginator | boolean;
 }

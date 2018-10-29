@@ -16,6 +16,7 @@ import { VirtualTableConfig, VirtualTableColumnInternal, sortColumn } from '../i
 import { of, Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { SimpleChange, DebugElement, EmbeddedViewRef } from '@angular/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -55,6 +56,7 @@ describe('VirtualTableComponent', () => {
           MatIconModule,
           MatFormFieldModule,
           ScrollDispatchModule,
+          MatPaginatorModule,
           DragDropModule,
           DynamicModule.withComponents([]),
         ],

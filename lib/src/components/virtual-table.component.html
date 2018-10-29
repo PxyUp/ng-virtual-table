@@ -51,7 +51,7 @@
       </div>
     </ng-template>
   </div>
-  <div class="virtual-table-bottom">
+  <div *ngIf="showPaginator" class="virtual-table-bottom">
     <mat-paginator [length]="sliceSize || 0" [pageSize]="10" (page)="onPageChange($event)" [pageSizeOptions]="[5, 10, 25, 100]">
     </mat-paginator>
   </div>

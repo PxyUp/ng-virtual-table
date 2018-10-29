@@ -80,6 +80,8 @@ export class VirtualTableComponent {
 
   public showHeader = true;
 
+  public showPaginator = false;
+
   public isEmptySubject$: Observable<boolean>;
 
   private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
@@ -144,6 +146,7 @@ export class VirtualTableComponent {
   applyConfig(config: VirtualTableConfig) {
     const columnArr = config.column;
     this.showHeader = config.header === false ? false : true;
+    this.showPaginator = config.pagination ? true : false;
     if (Array.isArray(columnArr)) {
       this._headerDict = Object.create(null);
       this.column = this.createColumnFromArray(columnArr);
@@ -201,6 +204,9 @@ export class VirtualTableComponent {
         return this.filterArrayByString(filterString, stream, this.column, pageIndex, pageSize);
       }),
       map(([stream, pageIndex, pageSize]) => {
+        if (!this.showPaginator) {
+          return stream;
+        }
         this.sliceSize = stream.length;
         const sliceStream = stream.slice(
           pageSize * pageIndex,

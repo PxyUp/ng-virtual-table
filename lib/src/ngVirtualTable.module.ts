@@ -1,5 +1,6 @@
 import { NgModule, ModuleWithProviders, EmbeddedViewRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import {
   ScrollDispatchModule,
   CdkVirtualForOf,
@@ -38,6 +39,7 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
     MatFormFieldModule,
     ScrollDispatchModule,
     DragDropModule,
+    MatPaginatorModule,
     DynamicModule.withComponents([]),
   ],
   exports: [VirtualTableComponent],

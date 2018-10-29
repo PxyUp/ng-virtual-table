@@ -10,7 +10,9 @@
       'active': headerItem.activeResize,
       'draggable': headerItem.draggable
       }"
-      (click)="headerItem.sort !== false && applySort(headerItem.key)" cdkDrag (cdkDragEnded)="headerItemDragFinished()" (cdkDragStarted)="headerItemDragStarted()" (mousedown)="!headerItem.draggable && mouseDownBlock($event)" (touchstart)="!headerItem.draggable && mouseDownBlock($event)">
+      (click)="headerItem.sort !== false && applySort(headerItem.key)" cdkDrag (cdkDragEnded)="headerItemDragFinished()"
+      (cdkDragStarted)="headerItemDragStarted()" (mousedown)="!headerItem.draggable && mouseDownBlock($event)"
+      (touchstart)="!headerItem.draggable && mouseDownBlock($event)">
       <div class="title">
         <div *ngIf="headerItem.draggable" class="drag-order-handle">
           <svg width="18px" fill="currentColor" cdkDragHandle viewBox="0 0 24 24">
@@ -48,5 +50,9 @@
         {{ dataSetEmptyPlaceholder }}
       </div>
     </ng-template>
+  </div>
+  <div class="virtual-table-bottom">
+    <mat-paginator [length]="sliceSize || 0" [pageSize]="10" (page)="onPageChange($event)" [pageSizeOptions]="[5, 10, 25, 100]">
+    </mat-paginator>
   </div>
 </div>

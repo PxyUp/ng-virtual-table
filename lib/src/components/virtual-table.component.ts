@@ -19,6 +19,7 @@ import {
   take,
   filter,
   skip,
+  tap,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import {
@@ -30,6 +31,7 @@ import {
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -87,6 +89,8 @@ export class VirtualTableComponent {
 
   private _columnsSet$: Subject<void> = new Subject();
 
+  public sliceSize = 0;
+
   private _columnsSetObs$: Observable<void> = this._columnsSet$
     .asObservable()
     .pipe(takeUntil(this._destroyed$));
@@ -98,6 +102,21 @@ export class VirtualTableComponent {
         this.columnResizeAction();
       }
     });
+
+  private pageIndex$: Subject<number> = new Subject<number>();
+  private pageIndexObs$: Observable<number> = this.pageIndex$
+    .asObservable()
+    .pipe(
+      startWith(0),
+      distinctUntilChanged(),
+      tap(() => this.viewport.scrollToIndex(0)),
+      takeUntil(this._destroyed$),
+    );
+
+  private pageSize$: Subject<number> = new Subject<number>();
+  private pageSizeObs$: Observable<number> = this.pageSize$
+    .asObservable()
+    .pipe(startWith(10), distinctUntilChanged(), takeUntil(this._destroyed$));
 
   private dataSourceSub$: Subscription;
 
@@ -141,18 +160,20 @@ export class VirtualTableComponent {
       obs,
       this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
       this.filter$,
+      this.pageIndexObs$,
+      this.pageSizeObs$,
     ).pipe(
-      map(([stream, sort, filterString]) => {
+      map(([stream, sort, filterString, pageIndex, pageSize]) => {
         const sliceStream = stream.slice();
 
         const sortColumn = this.column.find((e) => e.key === sort);
 
         if (!sort || !sortColumn) {
-          return [filterString, sliceStream];
+          return [filterString, sliceStream, pageIndex, pageSize];
         }
 
         if (!sortColumn.sort) {
-          return [filterString, sliceStream];
+          return [filterString, sliceStream, pageIndex, pageSize];
         }
 
         const _sortColumn = this._headerDict[sort];
@@ -174,10 +195,18 @@ export class VirtualTableComponent {
           );
         }
 
-        return [filterString, sliceStream];
+        return [filterString, sliceStream, pageIndex, pageSize];
       }),
-      map(([filterString, stream]) => {
-        return this.filterArrayByString(filterString, stream, this.column);
+      map(([filterString, stream, pageIndex, pageSize]) => {
+        return this.filterArrayByString(filterString, stream, this.column, pageIndex, pageSize);
+      }),
+      map(([stream, pageIndex, pageSize]) => {
+        this.sliceSize = stream.length;
+        const sliceStream = stream.slice(
+          pageSize * pageIndex,
+          pageSize * (pageIndex + 1) > stream.length ? stream.length : pageSize * (pageIndex + 1),
+        );
+        return sliceStream;
       }),
       publishBehavior([]),
       refCount(),
@@ -229,9 +258,11 @@ export class VirtualTableComponent {
     str: string,
     arr: Array<VirtualTableItem | number | string | boolean>,
     column: Array<VirtualTableColumn>,
-  ): Array<VirtualTableItem | number | string | boolean> {
+    pageIndex: number,
+    pageSize: number,
+  ): [Array<VirtualTableItem | number | string | boolean>, number, number] {
     if (!str) {
-      return arr;
+      return [arr, pageIndex, pageSize];
     }
     const filterString = str.toLocaleLowerCase();
 
@@ -245,7 +276,7 @@ export class VirtualTableComponent {
             .indexOf(filterString) > -1,
       ),
     );
-    return filterSliceStream;
+    return [filterSliceStream, pageIndex, pageSize];
   }
 
   public _sortAfterConfigWasSet() {
@@ -351,5 +382,10 @@ export class VirtualTableComponent {
 
   mouseDownBlock(event: MouseEvent) {
     event.stopImmediatePropagation();
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex$.next(event.pageIndex);
+    this.pageSize$.next(event.pageSize);
   }
 }

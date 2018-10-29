@@ -1091,6 +1091,65 @@ describe('VirtualTableComponent', () => {
     });
   });
 
+  describe('columnResizeAction', () => {
+    it(
+      'should resize after datasource was set',
+      fakeAsync(() => {
+        const dataSource = of(Array(5).fill(0).map((e, index) => index));
+
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              sort: null,
+              func: (e) => e,
+            },
+          ],
+        };
+
+        component.config = config;
+        component.dataSource = dataSource;
+        (component as any).columnResizeAction = jest.fn();
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        fixture.detectChanges();
+        expect((component as any).columnResizeAction).toBeCalled();
+      }),
+    );
+
+    it(
+      'should not resize after datasource was set',
+      fakeAsync(() => {
+        const dataSource = of(Array(5).fill(0).map((e, index) => index));
+
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              sort: null,
+              func: (e) => e,
+            },
+          ],
+          header: false,
+        };
+
+        component.config = config;
+        component.dataSource = dataSource;
+        (component as any).columnResizeAction = jest.fn();
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        fixture.detectChanges();
+        expect((component as any).columnResizeAction).not.toBeCalled();
+      }),
+    );
+  });
+
   describe('applySort', () => {
     it('should apply sort for column', () => {
       const dataSource = of(Array(5).fill(0).map((e, index) => index));

@@ -8,7 +8,7 @@ import {
   ChangeDetectorRef,
   HostBinding,
 } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest, Subscription } from 'rxjs';
+import { Observable, EMPTY, Subject, combineLatest, Subscription, zip } from 'rxjs';
 import {
   map,
   startWith,
@@ -30,11 +30,12 @@ import {
   VirtualTableColumnInternal,
   StreamWithEffect,
   VirtualTablePaginator,
+  VirtualPageChange,
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -65,6 +66,8 @@ export class VirtualTableComponent {
   @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
 
   @ViewChild('headerDiv') headerDiv: ElementRef;
+
+  @ViewChild(MatPaginator) paginatorDiv: MatPaginator;
 
   @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
@@ -117,20 +120,11 @@ export class VirtualTableComponent {
       }
     });
 
-  private pageIndex$: Subject<number> = new Subject<number>();
-  private pageIndexObs$: Observable<number> = this.pageIndex$
-    .asObservable()
-    .pipe(
-      startWith(0),
-      distinctUntilChanged(),
-      tap(() => this.viewport.scrollToIndex(0)),
-      takeUntil(this._destroyed$),
-    );
+  private pageChange$: Subject<VirtualPageChange> = new Subject<VirtualPageChange>();
 
-  private pageSize$: Subject<number> = new Subject<number>();
-  private pageSizeObs$: Observable<number> = this.pageSize$
+  private pageChangeObs$: Observable<VirtualPageChange> = this.pageChange$
     .asObservable()
-    .pipe(distinctUntilChanged(), takeUntil(this._destroyed$));
+    .pipe(startWith(null), tap(() => this.viewport.scrollToIndex(0)), takeUntil(this._destroyed$));
 
   private dataSourceSub$: Subscription;
 
@@ -169,6 +163,15 @@ export class VirtualTableComponent {
       this._headerDict = Object.create(null);
       this.column = this.createColumnFromArray(columnArr);
     }
+    if (this.showPaginator && this.paginatorDiv) {
+      this.paginatorDiv.firstPage();
+    }
+    if (config && config.pagination) {
+      this.pageChange$.next({
+        pageIndex: 0,
+        pageSize: this.paginationPageSize,
+      });
+    }
     this.cdr.detectChanges();
   }
 
@@ -181,18 +184,19 @@ export class VirtualTableComponent {
       obs,
       this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
       this.filter$,
-      this.pageIndexObs$,
-      this.pageSizeObs$.pipe(startWith(this.paginationPageSize)),
+      this.pageChangeObs$.pipe(
+        map((e) => ({
+          pageSize: (e && e.pageSize) || this.paginationPageSize,
+          pageIndex: (e && e.pageIndex) || 0,
+        })),
+      ),
     ).pipe(
-      map(([stream, sort, filter, pageIndex, pageSize]) => ({
+      map(([stream, sort, filter, pageChange]) => ({
         stream,
         effects: {
           filter,
           sort,
-          pagination: {
-            pageSize: pageSize,
-            pagIndex: pageIndex,
-          },
+          pagination: pageChange,
         },
       })),
       map((streamWithEffect) => this.sortingStream(streamWithEffect)),
@@ -227,10 +231,12 @@ export class VirtualTableComponent {
       takeUntil(this._destroyed$),
     );
 
-    this.dataSourceSub$ = this._dataStream.pipe(takeUntil(this._destroyed$)).subscribe((stream) => {
-      this.dataArray = stream;
-      this.cdr.detectChanges();
-    });
+    this.dataSourceSub$ = this._dataStream
+      .pipe(skip(1), takeUntil(this._destroyed$))
+      .subscribe((stream) => {
+        this.dataArray = stream;
+        this.cdr.detectChanges();
+      });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -320,11 +326,14 @@ export class VirtualTableComponent {
     const stream = streamWithEffect.stream;
     const pagination = streamWithEffect.effects && streamWithEffect.effects.pagination;
     if (!this.showPaginator) {
-      return streamWithEffect;
+      return {
+        stream: stream.slice(),
+        effects: streamWithEffect.effects,
+      };
     }
     this.sliceSize = stream.length;
     const pageSize = pagination.pageSize || this.defaultPaginationSetting.pageSize;
-    const pageIndex = pagination.pagIndex;
+    const pageIndex = pagination.pageIndex;
     const sliceStream = stream.slice(
       pageSize * pageIndex,
       pageSize * (pageIndex + 1) > stream.length ? stream.length : pageSize * (pageIndex + 1),
@@ -441,7 +450,10 @@ export class VirtualTableComponent {
   }
 
   onPageChange(event: PageEvent) {
-    this.pageIndex$.next(event.pageIndex);
-    this.pageSize$.next(event.pageSize);
+    this.paginationPageSize = event.pageSize;
+    this.pageChange$.next({
+      pageIndex: event.pageIndex,
+      pageSize: event.pageSize,
+    });
   }
 }

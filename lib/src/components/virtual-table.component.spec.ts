@@ -495,7 +495,7 @@ describe('VirtualTableComponent', () => {
           effects: {
             pagination: {
               pageSize: 2,
-              pagIndex: 0,
+              pageIndex: 0,
             },
           },
         }),
@@ -509,7 +509,7 @@ describe('VirtualTableComponent', () => {
         effects: {
           pagination: {
             pageSize: 2,
-            pagIndex: 0,
+            pageIndex: 0,
           },
         },
       });
@@ -529,7 +529,7 @@ describe('VirtualTableComponent', () => {
           effects: {
             pagination: {
               pageSize: 1,
-              pagIndex: 1,
+              pageIndex: 1,
             },
           },
         }),
@@ -542,7 +542,7 @@ describe('VirtualTableComponent', () => {
         effects: {
           pagination: {
             pageSize: 1,
-            pagIndex: 1,
+            pageIndex: 1,
           },
         },
       });
@@ -562,7 +562,7 @@ describe('VirtualTableComponent', () => {
           effects: {
             pagination: {
               pageSize: 1,
-              pagIndex: 0,
+              pageIndex: 0,
             },
           },
         }),
@@ -576,7 +576,29 @@ describe('VirtualTableComponent', () => {
         effects: {
           pagination: {
             pageSize: 1,
-            pagIndex: 0,
+            pageIndex: 0,
+          },
+        },
+      });
+
+      const stream1 = Array(10000).fill(0).map((e) => 5);
+      component.showPaginator = false;
+      expect(
+        component.applyPagination({
+          stream: stream1,
+          effects: {
+            pagination: {
+              pageSize: 1,
+              pageIndex: 0,
+            },
+          },
+        }),
+      ).toEqual({
+        stream: stream1,
+        effects: {
+          pagination: {
+            pageSize: 1,
+            pageIndex: 0,
           },
         },
       });
@@ -595,7 +617,7 @@ describe('VirtualTableComponent', () => {
           effects: {
             pagination: {
               pageSize: 1,
-              pagIndex: 0,
+              pageIndex: 0,
             },
           },
         }),
@@ -609,7 +631,29 @@ describe('VirtualTableComponent', () => {
         effects: {
           pagination: {
             pageSize: 1,
-            pagIndex: 0,
+            pageIndex: 0,
+          },
+        },
+      });
+
+      const stream1 = Array(10000).fill(0).map((e) => 5);
+      component.showPaginator = false;
+      expect(
+        component.applyPagination({
+          stream: stream1,
+          effects: {
+            pagination: {
+              pageSize: 1,
+              pageIndex: 0,
+            },
+          },
+        }),
+      ).toEqual({
+        stream: stream1,
+        effects: {
+          pagination: {
+            pageSize: 1,
+            pageIndex: 0,
           },
         },
       });
@@ -622,15 +666,13 @@ describe('VirtualTableComponent', () => {
         pageIndex: 555,
         pageSize: 555,
       } as any);
-      const sub1 = (component as any).pageIndexObs$.pipe(skip(1)).subscribe((v: number) => {
-        expect(v).toBe(555);
+      const sub1 = (component as any).pageChangeObs$.pipe(skip(1)).subscribe((v: number) => {
+        expect(v).toBe({
+          pageIndex: 555,
+          pageSize: 555,
+        });
       });
       sub1.unsubscribe();
-
-      const sub2 = (component as any).pageSizeObs$.subscribe((v: number) => {
-        expect(v).toBe(555);
-      });
-      sub2.unsubscribe();
     });
   });
 
@@ -1025,20 +1067,22 @@ describe('VirtualTableComponent', () => {
 
         component.config = config;
         component.dataSource = dataSource;
-
         component.ngOnChanges({
           config: new SimpleChange(null, component.config, false),
           dataSource: new SimpleChange(null, component.dataSource, false),
         });
         fixture.detectChanges();
         tick(1);
+
         const header = debugEl.query(By.css('.header'));
         const paginator = debugEl.query(By.css('.virtual-table-bottom'));
+
         expect(component.showPaginator).toBe(true);
+
         expect(paginator).not.toBe(null);
 
         expect(header).toBe(null);
-
+        const spy2 = jest.spyOn(component.paginatorDiv, 'firstPage');
         component.applyConfig(config2);
         fixture.detectChanges();
 
@@ -1046,7 +1090,14 @@ describe('VirtualTableComponent', () => {
         const paginatorAfter = debugEl.query(By.css('.virtual-table-bottom'));
         expect(headerAfter).not.toBe(null);
         expect(component.showPaginator).toBe(false);
+        expect(spy2).not.toBeCalled();
         expect(paginatorAfter).toBe(null);
+        component.applyConfig(config);
+        fixture.detectChanges();
+        const spy3 = jest.spyOn(component.paginatorDiv, 'firstPage');
+        component.applyConfig(config);
+        fixture.detectChanges();
+        expect(spy3).toBeCalled();
       }),
     );
 

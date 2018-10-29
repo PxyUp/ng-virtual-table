@@ -6,4 +6,5 @@ export {
   VirtualTableConfig,
   VirtualTableColumnComponent,
   VirtualTablePaginator,
+  VirtualPageChange,
 } from './src/interfaces';

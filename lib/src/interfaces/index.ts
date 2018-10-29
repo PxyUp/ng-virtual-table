@@ -46,9 +46,11 @@ export interface StreamWithEffect {
   effects?: {
     filter?: string;
     sort?: string;
-    pagination?: {
-      pageSize?: number;
-      pagIndex?: number;
-    };
+    pagination?: VirtualPageChange;
   };
+}
+
+export interface VirtualPageChange {
+  pageSize?: number;
+  pageIndex?: number;
 }

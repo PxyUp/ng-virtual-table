@@ -2,7 +2,8 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2) format('woff2');
+  src: url(https://fonts.gstatic.com/s/materialicons/v41/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2)
+    format('woff2');
 }
 
 $header-height: 40px;
@@ -13,11 +14,9 @@ $caret-width: 40px;
 $caret-height: 40px;
 $header-padding-top: 8px;
 $drag-animation: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-$active-box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-0 8px 10px 1px rgba(0, 0, 0, 0.14),
-0 3px 14px 2px rgba(0, 0, 0, 0.12);
-$pagination-size: 40px;
-
+$active-box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
+  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+$pagination-size: 56px;
 
 :host {
   display: block;
@@ -27,10 +26,28 @@ $pagination-size: 40px;
     font-family: 'Material Icons';
   }
 
+  &.with-header {
+    .virtual-table {
+      &-content {
+        height: calc(100% - #{$header-height} - #{$header-padding-top} - 1px) !important;
+      }
+    }
+  }
+
   &.with-pagination {
     .virtual-table {
       &-content {
-        height: calc(100% - #{$header-height} - #{$header-padding-top} - 1px - #{$pagination-size}) !important;
+        height: calc(100% - #{$pagination-size}) !important;
+      }
+    }
+  }
+
+  &.with-pagination.with-header {
+    .virtual-table {
+      &-content {
+        height: calc(
+          100% - #{$header-height} - #{$header-padding-top} - 1px - #{$pagination-size}
+        ) !important;
       }
     }
   }

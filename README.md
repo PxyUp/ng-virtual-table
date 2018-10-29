@@ -76,6 +76,7 @@ export interface VirtualTableColumnComponent {
 export interface VirtualTablePaginator {
   pageSize?: number; // default 10
   pageSizeOptions?: Array<number>; // default [5, 10, 25, 100];
+  showFirstLastButtons?: boolean; //default false;
 }
 
 export interface VirtualTableConfig {

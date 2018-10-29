@@ -19,7 +19,6 @@ import {
   refCount,
   take,
   filter,
-  skip,
   tap,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -49,6 +48,8 @@ export class VirtualTableComponent {
   public _oldWidth: number;
 
   private _headerWasSet = false;
+
+  public showFirstLastButtons = false;
 
   public filterIsOpen = false;
 
@@ -87,48 +88,36 @@ export class VirtualTableComponent {
 
   public column: Array<VirtualTableColumnInternal> = [];
 
-  public _dataStream: Observable<Array<VirtualTableItem>> = EMPTY;
+  public _dataStream: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
   private sort$: Subject<string> = new Subject<string>();
 
   private _destroyed$ = new Subject<void>();
 
-  public showHeader = true;
+  @HostBinding('class.with-header') public showHeader = true;
 
   @HostBinding('class.with-pagination') public showPaginator = false;
-
-  public isEmptySubject$: Observable<boolean>;
 
   private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
     .pipe(debounceTime(350), startWith(null), distinctUntilChanged(), takeUntil(this._destroyed$));
 
   private _sort$: Observable<string> = this.sort$.asObservable().pipe(takeUntil(this._destroyed$));
 
-  private _columnsSet$: Subject<void> = new Subject();
-
   public sliceSize = 0;
-
-  private _columnsSetObs$: Observable<void> = this._columnsSet$
-    .asObservable()
-    .pipe(takeUntil(this._destroyed$));
-
-  private _columnSubs$: Subscription = this._columnsSetObs$
-    .pipe(takeUntil(this._destroyed$))
-    .subscribe(() => {
-      if (this.showHeader) {
-        this.columnResizeAction();
-      }
-    });
 
   private pageChange$: Subject<VirtualPageChange> = new Subject<VirtualPageChange>();
 
   private pageChangeObs$: Observable<VirtualPageChange> = this.pageChange$
     .asObservable()
-    .pipe(startWith(null), tap(() => this.viewport.scrollToIndex(0)), takeUntil(this._destroyed$));
+    .pipe(
+      startWith(null),
+      tap(() => this.viewport && this.viewport.scrollToIndex(0)),
+      takeUntil(this._destroyed$),
+    );
 
   private dataSourceSub$: Subscription;
 
-  public dataArray: Array<VirtualTableItem | number | string | boolean> = [];
+  public dataArray: Array<VirtualTableItem | number | string | boolean> = null;
 
   constructor(private service: NgVirtualTableService, private cdr: ChangeDetectorRef) {}
 
@@ -153,6 +142,9 @@ export class VirtualTableComponent {
     const columnArr = config.column;
     this.showHeader = config.header === false ? false : true;
     this.showPaginator = config.pagination ? true : false;
+    this.showFirstLastButtons =
+      (config && typeof config.pagination === 'object' && config.pagination.showFirstLastButtons) ||
+      false;
     this.paginationPageSize =
       (config && typeof config.pagination === 'object' && config.pagination.pageSize) ||
       this.defaultPaginationSetting.pageSize;
@@ -170,7 +162,6 @@ export class VirtualTableComponent {
       pageIndex: 0,
       pageSize: this.paginationPageSize,
     });
-
     this.cdr.detectChanges();
   }
 
@@ -178,7 +169,7 @@ export class VirtualTableComponent {
     if (this.dataSourceSub$) {
       this.dataSourceSub$.unsubscribe();
     }
-
+    this.dataArray = null;
     this._dataStream = combineLatest(
       obs,
       this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
@@ -221,21 +212,15 @@ export class VirtualTableComponent {
         this.cdr.detectChanges();
       });
 
-    this._dataStream.pipe(skip(1), take(1), takeUntil(this._destroyed$)).subscribe(() => {
-      this._columnsSet$.next();
+    this.dataSourceSub$ = this._dataStream.pipe(takeUntil(this._destroyed$)).subscribe((stream) => {
+      if (this.dataArray === null) {
+        if (this.showHeader) {
+          this.columnResizeAction();
+        }
+      }
+      this.dataArray = stream;
+      this.cdr.detectChanges();
     });
-
-    this.isEmptySubject$ = this._dataStream.pipe(
-      map((data) => !data.length),
-      takeUntil(this._destroyed$),
-    );
-
-    this.dataSourceSub$ = this._dataStream
-      .pipe(skip(1), takeUntil(this._destroyed$))
-      .subscribe((stream) => {
-        this.dataArray = stream;
-        this.cdr.detectChanges();
-      });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -367,7 +352,6 @@ export class VirtualTableComponent {
 
   ngOnDestroy() {
     this._destroyed$.next();
-    this._columnSubs$.unsubscribe();
     if (this.dataSourceSub$) {
       this.dataSourceSub$.unsubscribe();
     }

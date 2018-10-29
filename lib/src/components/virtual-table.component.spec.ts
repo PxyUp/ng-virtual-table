@@ -152,18 +152,23 @@ describe('VirtualTableComponent', () => {
       component.config = config;
       component.dataSource = dataSource;
 
-      const sub = component._dataStream.subscribe((value) => {
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      const pipe = component._dataStream.pipe(skip(1));
+      const sub = pipe.subscribe((value) => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });
       sub.unsubscribe();
 
       component.filterControl.setValue('0');
-      const sub1 = component._dataStream.subscribe((value) => {
+      const sub1 = pipe.subscribe((value) => {
         expect(value).toEqual([0]);
       });
       sub1.unsubscribe();
       component.filterControl.setValue('01');
-      const sub2 = component._dataStream.subscribe((value) => {
+      const sub2 = pipe.subscribe((value) => {
         expect(value).toEqual([]);
       });
       sub2.unsubscribe();
@@ -318,105 +323,6 @@ describe('VirtualTableComponent', () => {
         component.resizingEvent(event, column);
         expect(column.width).toBe(268);
         expect(component._oldWidth).toBe(268);
-      }),
-    );
-  });
-
-  describe('isEmptySubject$', () => {
-    it('should emit false when datasource not  empty', () => {
-      const dataSource = of(Array(5).fill(0).map((e, index) => index));
-
-      const config: VirtualTableConfig = {
-        column: [
-          {
-            key: 'name',
-            name: 'Full name',
-            sort: null,
-            func: (e) => e,
-          },
-        ],
-      };
-
-      component.config = config;
-      component.dataSource = dataSource;
-
-      component.ngOnChanges({
-        config: new SimpleChange(null, component.config, false),
-        dataSource: new SimpleChange(null, component.dataSource, false),
-      });
-      fixture.detectChanges();
-
-      const sub = component.isEmptySubject$.subscribe((value) => {
-        expect(value).toBe(false);
-      });
-      sub.unsubscribe();
-    });
-
-    it('should emit true when datasource not empty', () => {
-      const dataSource = of([]);
-
-      const config: VirtualTableConfig = {
-        column: [
-          {
-            key: 'name',
-            name: 'Full name',
-            sort: null,
-            func: (e) => e,
-          },
-        ],
-      };
-
-      component.config = config;
-      component.dataSource = dataSource;
-
-      component.ngOnChanges({
-        config: new SimpleChange(null, component.config, false),
-        dataSource: new SimpleChange(null, component.dataSource, false),
-      });
-      fixture.detectChanges();
-
-      const sub = component.isEmptySubject$.subscribe((value) => {
-        expect(value).toBe(true);
-      });
-      sub.unsubscribe();
-    });
-
-    it(
-      'should emit true when datasource change on empty',
-      fakeAsync(() => {
-        const dataSource = of(Array(5).fill(0).map((e, index) => index));
-
-        const dataSource2 = of([]);
-
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              sort: null,
-              func: (e) => e,
-            },
-          ],
-        };
-
-        component.config = config;
-        component.dataSource = dataSource;
-
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-
-        const sub = component.isEmptySubject$.subscribe((value) => {
-          expect(value).toBe(false);
-        });
-        sub.unsubscribe();
-        component.applyDatasource(dataSource2);
-        const sub2 = component.isEmptySubject$.subscribe((value) => {
-          expect(value).toBe(true);
-        });
-        sub2.unsubscribe();
       }),
     );
   });
@@ -1977,6 +1883,11 @@ describe('VirtualTableComponent', () => {
       component.config = config;
       component.dataSource = dataSource;
 
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+
       const sub = component._dataStream.subscribe((value) => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });
@@ -1992,7 +1903,7 @@ describe('VirtualTableComponent', () => {
         expect(value).toEqual([4, 3, 2, 1, 0]);
       });
       sub3.unsubscribe();
-
+      component.applySort('name');
       const sub4 = component._dataStream.subscribe((value) => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });

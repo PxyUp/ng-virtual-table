@@ -30,8 +30,8 @@ export interface VirtualTableColumnComponent {
 }
 
 export interface VirtualTablePaginator {
-  pageSize: number;
-  pageSizeOptions: Array<number>;
+  pageSize?: number;
+  pageSizeOptions?: Array<number>;
 }
 
 export interface VirtualTableConfig {

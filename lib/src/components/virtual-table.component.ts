@@ -166,12 +166,11 @@ export class VirtualTableComponent {
     if (this.showPaginator && this.paginatorDiv) {
       this.paginatorDiv.firstPage();
     }
-    if (config && config.pagination) {
-      this.pageChange$.next({
-        pageIndex: 0,
-        pageSize: this.paginationPageSize,
-      });
-    }
+    this.pageChange$.next({
+      pageIndex: 0,
+      pageSize: this.paginationPageSize,
+    });
+
     this.cdr.detectChanges();
   }
 

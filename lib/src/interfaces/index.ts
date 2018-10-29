@@ -40,3 +40,15 @@ export interface VirtualTableConfig {
   filter?: boolean;
   pagination?: VirtualTablePaginator | boolean;
 }
+
+export interface StreamWithEffect {
+  stream: Array<VirtualTableItem | number | string | boolean>;
+  effects?: {
+    filter?: string;
+    sort?: string;
+    pagination?: {
+      pageSize: number;
+      pagIndex: number;
+    };
+  };
+}

@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DynamicModule } from 'ng-dynamic-component';
 import { NgVirtualTableService } from './services/ngVirtualTable.service';
+import { LayoutModule } from '@angular/cdk/layout';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -40,6 +41,7 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
     ScrollDispatchModule,
     DragDropModule,
     MatPaginatorModule,
+    LayoutModule,
     DynamicModule.withComponents([]),
   ],
   exports: [VirtualTableComponent],

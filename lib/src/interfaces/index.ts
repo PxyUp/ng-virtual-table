@@ -47,8 +47,8 @@ export interface StreamWithEffect {
     filter?: string;
     sort?: string;
     pagination?: {
-      pageSize: number;
-      pagIndex: number;
+      pageSize?: number;
+      pagIndex?: number;
     };
   };
 }

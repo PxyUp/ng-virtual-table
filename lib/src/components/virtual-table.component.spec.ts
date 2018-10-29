@@ -17,6 +17,7 @@ import { of, Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { SimpleChange, DebugElement, EmbeddedViewRef } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { skip } from 'rxjs/operators';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -479,7 +480,396 @@ describe('VirtualTableComponent', () => {
     });
   });
 
-  describe('filterArrayByString', () => {
+  describe('applyPagination', () => {
+    it('should return part of stream', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+      component.showPaginator = true;
+      expect(
+        component.applyPagination({
+          stream,
+          effects: {
+            pagination: {
+              pageSize: 2,
+              pagIndex: 0,
+            },
+          },
+        }),
+      ).toEqual({
+        stream: [
+          { age: 22222 },
+          {
+            age: 333333,
+          },
+        ],
+        effects: {
+          pagination: {
+            pageSize: 2,
+            pagIndex: 0,
+          },
+        },
+      });
+    });
+
+    it('should return part of stream', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+      component.showPaginator = true;
+      expect(
+        component.applyPagination({
+          stream,
+          effects: {
+            pagination: {
+              pageSize: 1,
+              pagIndex: 1,
+            },
+          },
+        }),
+      ).toEqual({
+        stream: [
+          {
+            age: 333333,
+          },
+        ],
+        effects: {
+          pagination: {
+            pageSize: 1,
+            pagIndex: 1,
+          },
+        },
+      });
+    });
+
+    it('should return all of stream with showPaginator', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+      component.showPaginator = false;
+      expect(
+        component.applyPagination({
+          stream,
+          effects: {
+            pagination: {
+              pageSize: 1,
+              pagIndex: 0,
+            },
+          },
+        }),
+      ).toEqual({
+        stream: [
+          { age: 22222 },
+          {
+            age: 333333,
+          },
+        ],
+        effects: {
+          pagination: {
+            pageSize: 1,
+            pagIndex: 0,
+          },
+        },
+      });
+    });
+
+    it('should return all of stream without showPaginator', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+      expect(
+        component.applyPagination({
+          stream,
+          effects: {
+            pagination: {
+              pageSize: 1,
+              pagIndex: 0,
+            },
+          },
+        }),
+      ).toEqual({
+        stream: [
+          { age: 22222 },
+          {
+            age: 333333,
+          },
+        ],
+        effects: {
+          pagination: {
+            pageSize: 1,
+            pagIndex: 0,
+          },
+        },
+      });
+    });
+  });
+
+  describe('onPageChange', () => {
+    it('should get data from subject', () => {
+      component.onPageChange({
+        pageIndex: 555,
+        pageSize: 555,
+      } as any);
+      const sub1 = (component as any).pageIndexObs$.pipe(skip(1)).subscribe((v: number) => {
+        expect(v).toBe(555);
+      });
+      sub1.unsubscribe();
+
+      const sub2 = (component as any).pageSizeObs$.subscribe((v: number) => {
+        expect(v).toBe(555);
+      });
+      sub2.unsubscribe();
+    });
+  });
+
+  describe('sortingStream', () => {
+    it('should not sort stream with another key', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+
+      component.column = [
+        {
+          name: 'Full Name',
+          key: 'age',
+          func: (e) => e.age,
+          comp: service.defaultComparator,
+          sort: 'asc',
+        },
+      ];
+
+      const effects = {
+        sort: 'asdasd',
+      };
+
+      (component as any)._headerDict = {
+        age: {
+          name: 'Full Name',
+          key: 'age',
+          func: (e: any) => e.age,
+          comp: service.defaultComparator,
+          sort: 'asc',
+        },
+      };
+
+      expect(
+        component.sortingStream({
+          stream,
+          effects,
+        }),
+      ).toEqual({
+        stream: [
+          { age: 22222 },
+          {
+            age: 333333,
+          },
+        ],
+        effects: effects,
+      });
+    });
+
+    it('should sort stream by column with `desc`', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+
+      const effects = {
+        sort: 'age',
+      };
+      component.column = [
+        {
+          name: 'Full Name',
+          key: 'age',
+          func: (e) => e.age,
+          comp: service.defaultComparator,
+          sort: 'desc',
+        },
+      ];
+
+      (component as any)._headerDict = {
+        age: {
+          name: 'Full Name',
+          key: 'age',
+          func: (e: any) => e.age,
+          comp: service.defaultComparator,
+          sort: 'desc',
+        },
+      };
+
+      expect(
+        component.sortingStream({
+          stream,
+          effects,
+        }),
+      ).toEqual({
+        stream: [
+          {
+            age: 333333,
+          },
+          { age: 22222 },
+        ],
+        effects: effects,
+      });
+    });
+
+    it('should sort stream by column with `asc`', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+
+      const effects = {
+        sort: 'age',
+      };
+      component.column = [
+        {
+          name: 'Full Name',
+          key: 'age',
+          func: (e) => e.age,
+          comp: service.defaultComparator,
+          sort: 'asc',
+        },
+      ];
+
+      (component as any)._headerDict = {
+        age: {
+          name: 'Full Name',
+          key: 'age',
+          func: (e: any) => e.age,
+          comp: service.defaultComparator,
+          sort: 'asc',
+        },
+      };
+      expect(
+        component.sortingStream({
+          stream,
+          effects,
+        }),
+      ).toEqual({
+        stream: [
+          { age: 22222 },
+          {
+            age: 333333,
+          },
+        ],
+        effects: effects,
+      });
+    });
+
+    it('should sort stream by column with null', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+
+      const effects = {
+        sort: 'age',
+      };
+
+      component.column = [
+        {
+          name: 'Full Name',
+          key: 'age',
+          func: (e) => e.age,
+          sort: null as sortColumn,
+        },
+      ];
+      expect(
+        component.sortingStream({
+          stream,
+          effects,
+        }),
+      ).toEqual({
+        stream: [
+          { age: 22222 },
+          {
+            age: 333333,
+          },
+        ],
+        effects: effects,
+      });
+    });
+  });
+
+  describe('filterStream', () => {
+    it('should filter stream by string by custom get', () => {
+      const stream = [
+        { age: 22222 },
+        {
+          age: 333333,
+        },
+      ];
+      component.column = [
+        {
+          name: 'Full Name',
+          key: 'age',
+          func: (e) => e.age,
+          comp: service.defaultComparator,
+          sort: null as sortColumn,
+        },
+      ];
+      expect(
+        component.filterStream({
+          stream: stream,
+          effects: {
+            filter: '2222',
+          },
+        }),
+      ).toEqual({ effects: { filter: '2222' }, stream: [{ age: 22222 }] });
+
+      expect(
+        component.filterStream({
+          stream: stream,
+          effects: {
+            filter: '4444',
+          },
+        }),
+      ).toEqual({ effects: { filter: '4444' }, stream: [] });
+    });
+
+    it('should filter stream by string', () => {
+      const stream = [22222, 33333];
+      component.column = [
+        {
+          name: 'Full Name',
+          key: 'name',
+          func: (e) => e,
+          comp: service.defaultComparator,
+          sort: null as sortColumn,
+        },
+      ];
+      expect(
+        component.filterStream({
+          stream: stream,
+          effects: {
+            filter: '2222',
+          },
+        }),
+      ).toEqual({ effects: { filter: '2222' }, stream: [22222] });
+    });
+
     it('should filter stream by string', () => {
       const str = '222';
       const config: VirtualTableConfig = {
@@ -495,11 +885,21 @@ describe('VirtualTableComponent', () => {
 
       const stream = [22222, 33333];
       expect(
-        component.filterArrayByString(str, stream, service.createColumnFromArray(config.column)),
-      ).toEqual([22222]);
+        component.filterStream({
+          stream: stream,
+          effects: {
+            filter: '4444',
+          },
+        }),
+      ).toEqual({
+        effects: {
+          filter: '4444',
+        },
+        stream: [],
+      });
     });
 
-    it('should return stream', () => {
+    it('should return all stream', () => {
       const str = null as any;
       const config: VirtualTableConfig = {
         column: [
@@ -514,8 +914,10 @@ describe('VirtualTableComponent', () => {
 
       const stream = [22222, 33333];
       expect(
-        component.filterArrayByString(str, stream, service.createColumnFromArray(config.column)),
-      ).toEqual([22222, 33333]);
+        component.filterStream({
+          stream: stream,
+        }),
+      ).toEqual({ effects: undefined, stream: [22222, 33333] });
     });
   });
 
@@ -551,7 +953,103 @@ describe('VirtualTableComponent', () => {
     });
   });
 
+  describe('ngOnChanges', () => {
+    it('should not execute all func', () => {
+      component.applyConfig = jest.fn();
+      component.applyDatasource = jest.fn();
+
+      component.ngOnChanges({});
+
+      expect(component.applyConfig).not.toBeCalled();
+      expect(component.applyDatasource).not.toBeCalled();
+    });
+
+    it('should execute all func', () => {
+      component.applyConfig = jest.fn();
+      component.applyDatasource = jest.fn();
+
+      component.ngOnChanges({
+        config: { currentValue: {} } as any,
+        dataSource: { currentValue: of([1, 2, 3]) } as any,
+      });
+
+      expect(component.applyConfig).toBeCalled();
+      expect(component.applyDatasource).toBeCalled();
+    });
+
+    it('should execute applyConfig func', () => {
+      component.applyConfig = jest.fn();
+      component.applyDatasource = jest.fn();
+
+      component.ngOnChanges({
+        config: { currentValue: {} } as any,
+      });
+
+      expect(component.applyConfig).toBeCalled();
+      expect(component.applyDatasource).not.toBeCalled();
+    });
+
+    it('should execute applyDatasource func', () => {
+      component.applyConfig = jest.fn();
+      component.applyDatasource = jest.fn();
+
+      component.ngOnChanges({
+        dataSource: { currentValue: of([1, 2, 3]) } as any,
+      });
+
+      expect(component.applyConfig).not.toBeCalled();
+      expect(component.applyDatasource).toBeCalled();
+    });
+  });
+
   describe('applyConfig', () => {
+    it(
+      'should apply config with paginator',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          header: false,
+          pagination: true,
+        };
+
+        const config2: VirtualTableConfig = {
+          header: true,
+          pagination: false,
+        };
+
+        const dataSource = of(
+          Array(100).fill(0).map((e) => ({
+            name: Math.random().toString(36).substring(7),
+            age: Math.round(Math.random() * 1000),
+          })),
+        );
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        fixture.detectChanges();
+        tick(1);
+        const header = debugEl.query(By.css('.header'));
+        const paginator = debugEl.query(By.css('.virtual-table-bottom'));
+        expect(component.showPaginator).toBe(true);
+        expect(paginator).not.toBe(null);
+
+        expect(header).toBe(null);
+
+        component.applyConfig(config2);
+        fixture.detectChanges();
+
+        const headerAfter = debugEl.query(By.css('.header'));
+        const paginatorAfter = debugEl.query(By.css('.virtual-table-bottom'));
+        expect(headerAfter).not.toBe(null);
+        expect(component.showPaginator).toBe(false);
+        expect(paginatorAfter).toBe(null);
+      }),
+    );
+
     it(
       'should apply config',
       fakeAsync(() => {
@@ -593,7 +1091,265 @@ describe('VirtualTableComponent', () => {
     );
   });
 
+  describe('Set pagination settings', () => {
+    it(
+      'should set custom pagination settings',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+          pagination: {
+            pageSizeOptions: [1, 88, 132],
+          },
+        };
+
+        const dataSource = of([
+          {
+            age: 44,
+          },
+          {
+            age: 23,
+          },
+          {
+            age: 2,
+          },
+        ]);
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        finishInit(fixture);
+        expect(component.paginationPageSize).toBe(component.defaultPaginationSetting.pageSize);
+        expect(component.paginationPageOptions).toEqual([1, 88, 132]);
+      }),
+    );
+
+    it(
+      'should set custom pagination settings',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+          pagination: {
+            pageSize: 88,
+          },
+        };
+
+        const dataSource = of([
+          {
+            age: 44,
+          },
+          {
+            age: 23,
+          },
+          {
+            age: 2,
+          },
+        ]);
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        finishInit(fixture);
+        expect(component.paginationPageSize).toBe(88);
+        expect(component.paginationPageOptions).toBe(
+          component.defaultPaginationSetting.pageSizeOptions,
+        );
+      }),
+    );
+
+    it(
+      'should set pagination default settings',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+          pagination: true,
+        };
+
+        const dataSource = of([
+          {
+            age: 44,
+          },
+          {
+            age: 23,
+          },
+          {
+            age: 2,
+          },
+        ]);
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        finishInit(fixture);
+        expect(component.paginationPageSize).toBe(component.defaultPaginationSetting.pageSize);
+        expect(component.paginationPageOptions).toBe(
+          component.defaultPaginationSetting.pageSizeOptions,
+        );
+      }),
+    );
+  });
+
   describe('Template', () => {
+    it(
+      'should not render paginator by default',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        const dataSource = of([
+          {
+            age: 44,
+          },
+          {
+            age: 23,
+          },
+          {
+            age: 2,
+          },
+        ]);
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        finishInit(fixture);
+        const item = debugEl.query(By.css('.virtual-table-bottom'));
+        expect(item).toBe(null);
+        expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(false);
+      }),
+    );
+
+    it(
+      'should not render paginator',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+          pagination: false,
+        };
+
+        const dataSource = of([
+          {
+            age: 44,
+          },
+          {
+            age: 23,
+          },
+          {
+            age: 2,
+          },
+        ]);
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        finishInit(fixture);
+        const item = debugEl.query(By.css('.virtual-table-bottom'));
+        expect(item).toBe(null);
+        expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(false);
+      }),
+    );
+
+    it(
+      'should render paginator',
+      fakeAsync(() => {
+        const config: VirtualTableConfig = {
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+          pagination: true,
+        };
+
+        const dataSource = of([
+          {
+            age: 44,
+          },
+          {
+            age: 23,
+          },
+          {
+            age: 2,
+          },
+        ]);
+
+        component.config = config;
+        component.dataSource = dataSource;
+
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+          dataSource: new SimpleChange(null, component.dataSource, false),
+        });
+        finishInit(fixture);
+        const item = debugEl.query(By.css('.virtual-table-bottom'));
+        expect(item).not.toBe(null);
+        expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(true);
+      }),
+    );
+
     it(
       'should presort `ASC` item in table content ',
       fakeAsync(() => {

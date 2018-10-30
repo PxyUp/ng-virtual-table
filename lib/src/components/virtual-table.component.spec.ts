@@ -14,11 +14,11 @@ import {
 import { DragDropModule, CdkDragDrop, CdkDragMove } from '@angular/cdk/drag-drop';
 import { DynamicModule } from 'ng-dynamic-component';
 import { VirtualTableConfig, VirtualTableColumnInternal, sortColumn } from '../interfaces';
-import { of, Observable } from 'rxjs';
+import { of, Observable, Observer } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { SimpleChange, DebugElement, EmbeddedViewRef } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { skip } from 'rxjs/operators';
+import { skip, delay } from 'rxjs/operators';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -865,6 +865,133 @@ describe('VirtualTableComponent', () => {
   });
 
   describe('applyConfig', () => {
+    it(
+      'should execute serverSideStrategyObs',
+      fakeAsync(() => {
+        const fn = (eff: any) => {
+          const mock = Observable.create((o) => {
+            o.next({
+              stream: [1, 2, 3],
+              totalSize: 3,
+            });
+            o.complete();
+          }).pipe(delay(1000));
+          return mock;
+        };
+
+        const config: VirtualTableConfig = {
+          header: false,
+          serverSide: true,
+          serverSideResolver: fn,
+          pagination: true,
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        component.config = config;
+        (component as any).serverSideStrategyObs = jest.fn((e) => of([1, 2, 3]));
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+        });
+        fixture.detectChanges();
+        tick(1);
+        expect((component as any).serverSideStrategyObs).toBeCalled();
+      }),
+    );
+
+    it(
+      'should serverSideStrategyObs throw error',
+      fakeAsync(() => {
+        const fn = (eff: any) => {
+          const mock = Observable.create((o) => {
+            o.next({
+              stream: [1, 2, 3],
+              totalSize: 3,
+            });
+            o.complete();
+          }).pipe(delay(1000));
+          return mock;
+        };
+
+        const config: VirtualTableConfig = {
+          header: false,
+          serverSide: true,
+          //serverSideResolver: mock,
+          pagination: true,
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        component.config = config;
+        try {
+          component.ngOnChanges({
+            config: new SimpleChange(null, component.config, false),
+          });
+          fixture.detectChanges();
+          tick(1);
+        } catch (e) {
+          expect(e.message).toBe('You use serverSide, serverSideResolver must be exist!');
+        }
+      }),
+    );
+
+    it(
+      'should serverSideStrategyObs apply params',
+      fakeAsync(() => {
+        const fn = (eff: any) => {
+          const mock = Observable.create((o) => {
+            o.next({
+              stream: [1, 2, 3],
+              totalSize: 3,
+            });
+            o.complete();
+          }).pipe(delay(1000));
+          return mock;
+        };
+
+        const config: VirtualTableConfig = {
+          header: false,
+          serverSide: true,
+          serverSideResolver: fn,
+          pagination: true,
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        component.config = config;
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+        });
+        fixture.detectChanges();
+        tick(1);
+        expect(component.showLoading).toBe(true);
+        tick(1000);
+        expect(component.showLoading).toBe(false);
+        expect(component.sliceSize).toBe(3);
+      }),
+    );
+
     it(
       'should apply config with paginator',
       fakeAsync(() => {

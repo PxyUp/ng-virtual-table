@@ -32,6 +32,7 @@ import {
   VirtualTablePaginator,
   VirtualPageChange,
   ResponseStreamWithSize,
+  VirtualTableEffect,
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
@@ -194,30 +195,11 @@ export class VirtualTableComponent {
       ),
     ).pipe(
       map(([stream, sort, filter, pageChange]) => {
-        let sortEffect;
-        let pagginationEffect;
-        const columForSort = this.column.find((e) => e.key === sort);
-        if (!this.showPaginator) {
-          pagginationEffect = undefined;
-        } else {
-          pagginationEffect = pageChange;
-        }
-        if (!columForSort) {
-          sortEffect = undefined;
-        } else {
-          sortEffect = {
-            sortColumn: sort,
-            sortType: columForSort.sort,
-          };
-        }
+        const effect = this.createEffect(sort, filter, pageChange);
         this.effectChanged$.next();
         return {
           stream,
-          effects: {
-            filter,
-            sort: sortEffect,
-            pagination: pagginationEffect,
-          },
+          effects: effect,
         };
       }),
       switchMap((streamWithEffect) => {
@@ -306,6 +288,34 @@ export class VirtualTableComponent {
     );
 
     return obs;
+  }
+
+  private createEffect(
+    sort: string,
+    filter: string,
+    pageChange: VirtualPageChange,
+  ): VirtualTableEffect {
+    let sortEffect;
+    let pagginationEffect;
+    const columForSort = this.column.find((e) => e.key === sort);
+    if (!this.showPaginator) {
+      pagginationEffect = undefined;
+    } else {
+      pagginationEffect = pageChange;
+    }
+    if (!columForSort) {
+      sortEffect = undefined;
+    } else {
+      sortEffect = {
+        sortColumn: sort,
+        sortType: columForSort.sort,
+      };
+    }
+    return {
+      filter,
+      sort: sortEffect,
+      pagination: pagginationEffect,
+    };
   }
 
   public sortingStream(streamWithEffect: StreamWithEffect): StreamWithEffect {

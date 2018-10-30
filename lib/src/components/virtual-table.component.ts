@@ -281,11 +281,12 @@ export class VirtualTableComponent {
       throw new Error('You use serverSide, serverSideResolver must be exist!');
     }
     const obs = this._config.serverSideResolver(streamWithEffect.effects);
-    return obs.stream.pipe(
-      tap(() => {
+    return obs.pipe(
+      tap((response) => {
         this.showLoading = false;
-        this.sliceSize = obs.totalSize;
+        this.sliceSize = response.totalSize;
       }),
+      map((response) => response.stream),
       takeUntil(this.effectChanged$),
     );
   }

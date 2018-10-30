@@ -42,11 +42,11 @@ export interface VirtualTableConfig {
   filter?: boolean;
   pagination?: VirtualTablePaginator | boolean;
   serverSide?: boolean;
-  serverSideResolver?: (effects: VirtualTableEffect) => ResponseStreamWithSize;
+  serverSideResolver?: (effects: VirtualTableEffect) => Observable<ResponseStreamWithSize>;
 }
 
 export interface ResponseStreamWithSize {
-  stream: Observable<Array<any>>;
+  stream: Array<any>;
   totalSize: number;
 }
 export interface StreamWithEffect {

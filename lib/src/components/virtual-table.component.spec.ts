@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ScrollDispatchModule,
   CdkVirtualForOf,
@@ -58,6 +59,7 @@ describe('VirtualTableComponent', () => {
           MatFormFieldModule,
           ScrollDispatchModule,
           MatPaginatorModule,
+          MatProgressSpinnerModule,
           DragDropModule,
           DynamicModule.withComponents([]),
         ],

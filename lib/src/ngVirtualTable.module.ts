@@ -1,6 +1,7 @@
 import { NgModule, ModuleWithProviders, EmbeddedViewRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ScrollDispatchModule,
   CdkVirtualForOf,
@@ -41,6 +42,7 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
     ScrollDispatchModule,
     DragDropModule,
     MatPaginatorModule,
+    MatProgressSpinnerModule,
     LayoutModule,
     DynamicModule.withComponents([]),
   ],

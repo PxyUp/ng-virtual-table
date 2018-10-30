@@ -31,6 +31,7 @@ import {
   StreamWithEffect,
   VirtualTablePaginator,
   VirtualPageChange,
+  ResponseStreamWithSize,
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
@@ -47,6 +48,8 @@ export class VirtualTableComponent {
   private _config: VirtualTableConfig;
 
   private serverSideStrategy = false;
+
+  public showLoading = false;
 
   public _oldWidth: number;
 
@@ -94,6 +97,8 @@ export class VirtualTableComponent {
   private sort$: Subject<string> = new Subject<string>();
 
   private _destroyed$ = new Subject<void>();
+
+  private effectChanged$ = new Subject<void>();
 
   @HostBinding('class.with-header') public showHeader = true;
 
@@ -205,6 +210,7 @@ export class VirtualTableComponent {
             sortType: columForSort.sort,
           };
         }
+        this.effectChanged$.next();
         return {
           stream,
           effects: {
@@ -256,6 +262,11 @@ export class VirtualTableComponent {
       this.applyConfig(this._config);
     }
 
+    if (this.serverSideStrategy) {
+      this.applyDatasource(EMPTY.pipe(startWith([]), takeUntil(this._destroyed$)));
+      return;
+    }
+
     if ('dataSource' in changes) {
       const newDataSource = changes.dataSource.currentValue as Observable<Array<VirtualTableItem>>;
       this.applyDatasource(newDataSource.pipe(takeUntil(this._destroyed$)));
@@ -265,7 +276,18 @@ export class VirtualTableComponent {
   private serverSideStrategyObs(
     streamWithEffect: StreamWithEffect,
   ): Observable<Array<VirtualTableItem | number | string | boolean>> {
-    return of(streamWithEffect.stream);
+    this.showLoading = true;
+    if (!this._config.serverSideResolver) {
+      throw new Error('You use serverSide, serverSideResolver must be exist!');
+    }
+    const obs = this._config.serverSideResolver(streamWithEffect.effects);
+    return obs.stream.pipe(
+      tap(() => {
+        this.showLoading = false;
+        this.sliceSize = obs.totalSize;
+      }),
+      takeUntil(this.effectChanged$),
+    );
   }
 
   private clientSideStrategyObs(
@@ -279,6 +301,7 @@ export class VirtualTableComponent {
       map((streamWithEffect) => this.filterStream(streamWithEffect)),
       map((streamWithEffect) => this.applyPagination(streamWithEffect)),
       map((streamWithEffect) => streamWithEffect.stream),
+      tap((stream) => (this.sliceSize = stream.length)),
     );
 
     return obs;
@@ -369,7 +392,6 @@ export class VirtualTableComponent {
         effects: streamWithEffect.effects,
       };
     }
-    this.sliceSize = stream.length;
     const pageSize = pagination.pageSize || this.defaultPaginationSetting.pageSize;
     const pageIndex = pagination.pageIndex;
     const sliceStream = stream.slice(

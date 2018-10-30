@@ -190,7 +190,13 @@ export class VirtualTableComponent {
     ).pipe(
       map(([stream, sort, filter, pageChange]) => {
         let sortEffect;
+        let pagginationEffect;
         const columForSort = this.column.find((e) => e.key === sort);
+        if (!this.showPaginator) {
+          pagginationEffect = undefined;
+        } else {
+          pagginationEffect = pageChange;
+        }
         if (!columForSort) {
           sortEffect = undefined;
         } else {
@@ -204,7 +210,7 @@ export class VirtualTableComponent {
           effects: {
             filter,
             sort: sortEffect,
-            pagination: pageChange,
+            pagination: pagginationEffect,
           },
         };
       }),
@@ -259,7 +265,6 @@ export class VirtualTableComponent {
   private serverSideStrategyObs(
     streamWithEffect: StreamWithEffect,
   ): Observable<Array<VirtualTableItem | number | string | boolean>> {
-    console.log(streamWithEffect);
     return of(streamWithEffect.stream);
   }
 
@@ -358,7 +363,7 @@ export class VirtualTableComponent {
   public applyPagination(streamWithEffect: StreamWithEffect): StreamWithEffect {
     const stream = streamWithEffect.stream;
     const pagination = streamWithEffect.effects && streamWithEffect.effects.pagination;
-    if (!this.showPaginator) {
+    if (!pagination) {
       return {
         stream: stream.slice(),
         effects: streamWithEffect.effects,

@@ -394,7 +394,7 @@ describe('VirtualTableComponent', () => {
           age: 333333,
         },
       ];
-      component.showPaginator = true;
+
       expect(
         component.applyPagination({
           stream,
@@ -428,7 +428,7 @@ describe('VirtualTableComponent', () => {
           age: 333333,
         },
       ];
-      component.showPaginator = true;
+
       expect(
         component.applyPagination({
           stream,
@@ -461,15 +461,12 @@ describe('VirtualTableComponent', () => {
           age: 333333,
         },
       ];
-      component.showPaginator = false;
+
       expect(
         component.applyPagination({
           stream,
           effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
+            pagination: undefined,
           },
         }),
       ).toEqual({
@@ -480,88 +477,20 @@ describe('VirtualTableComponent', () => {
           },
         ],
         effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
+          pagination: undefined,
         },
       });
 
       const stream1 = Array(10000).fill(0).map((e) => 5);
-      component.showPaginator = false;
+
       expect(
         component.applyPagination({
           stream: stream1,
-          effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
-          },
+          effects: {},
         }),
       ).toEqual({
         stream: stream1,
-        effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
-        },
-      });
-    });
-
-    it('should return all of stream without showPaginator', () => {
-      const stream = [
-        { age: 22222 },
-        {
-          age: 333333,
-        },
-      ];
-      expect(
-        component.applyPagination({
-          stream,
-          effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
-          },
-        }),
-      ).toEqual({
-        stream: [
-          { age: 22222 },
-          {
-            age: 333333,
-          },
-        ],
-        effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
-        },
-      });
-
-      const stream1 = Array(10000).fill(0).map((e) => 5);
-      component.showPaginator = false;
-      expect(
-        component.applyPagination({
-          stream: stream1,
-          effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
-          },
-        }),
-      ).toEqual({
-        stream: stream1,
-        effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
-        },
+        effects: {},
       });
     });
   });

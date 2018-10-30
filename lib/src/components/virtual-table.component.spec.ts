@@ -778,6 +778,8 @@ describe('VirtualTableComponent', () => {
           sort: null as sortColumn,
         },
       ];
+      component.config = {};
+      component.config.filter = true;
       expect(
         component.filterStream({
           stream: stream,
@@ -808,6 +810,8 @@ describe('VirtualTableComponent', () => {
           sort: null as sortColumn,
         },
       ];
+      component.config = {};
+      component.config.filter = true;
       expect(
         component.filterStream({
           stream: stream,
@@ -819,18 +823,8 @@ describe('VirtualTableComponent', () => {
     });
 
     it('should filter stream by string', () => {
-      const str = '222';
-      const config: VirtualTableConfig = {
-        column: [
-          {
-            key: 'name',
-            name: 'Full name',
-            sort: null,
-            func: (e) => e,
-          },
-        ],
-      };
-
+      component.config = {};
+      component.config.filter = true;
       const stream = [22222, 33333];
       expect(
         component.filterStream({
@@ -847,18 +841,9 @@ describe('VirtualTableComponent', () => {
       });
     });
 
-    it('should return all stream', () => {
-      const str = null as any;
-      const config: VirtualTableConfig = {
-        column: [
-          {
-            key: 'name',
-            name: 'Full name',
-            sort: null,
-            func: (e) => e,
-          },
-        ],
-      };
+    it('should return all stream because filter effect absent', () => {
+      component.config = {};
+      component.config.filter = true;
 
       const stream = [22222, 33333];
       expect(
@@ -866,6 +851,25 @@ describe('VirtualTableComponent', () => {
           stream: stream,
         }),
       ).toEqual({ effects: undefined, stream: [22222, 33333] });
+    });
+
+    it('should return all stream because filter set false', () => {
+      component.config = {};
+      component.config.filter = false;
+      const stream = [22222, 33333];
+      expect(
+        component.filterStream({
+          stream: stream,
+          effects: {
+            filter: '4444',
+          },
+        }),
+      ).toEqual({
+        effects: {
+          filter: '4444',
+        },
+        stream: [22222, 33333],
+      });
     });
   });
 

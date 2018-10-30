@@ -99,7 +99,13 @@ export class VirtualTableComponent {
   @HostBinding('class.with-pagination') public showPaginator = false;
 
   private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
-    .pipe(debounceTime(350), startWith(null), distinctUntilChanged(), takeUntil(this._destroyed$));
+    .pipe(
+      debounceTime(350),
+      startWith(null),
+      tap((v) => v && v.length && this.paginatorDiv && this.paginatorDiv.firstPage()),
+      distinctUntilChanged(),
+      takeUntil(this._destroyed$),
+    );
 
   private _sort$: Observable<string> = this.sort$.asObservable().pipe(takeUntil(this._destroyed$));
 
@@ -282,7 +288,7 @@ export class VirtualTableComponent {
   public filterStream(streamWithEffect: StreamWithEffect): StreamWithEffect {
     const stream = streamWithEffect.stream;
     const filterStr = streamWithEffect.effects && streamWithEffect.effects.filter;
-    if (!filterStr) {
+    if (!filterStr || !(this.config && this.config.filter)) {
       return {
         stream,
         effects: streamWithEffect.effects,

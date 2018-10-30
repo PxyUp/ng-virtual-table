@@ -861,12 +861,12 @@ describe('VirtualTableComponent', () => {
         component.filterStream({
           stream: stream,
           effects: {
-            filter: '4444',
+            filter: '222',
           },
         }),
       ).toEqual({
         effects: {
-          filter: '4444',
+          filter: '222',
         },
         stream: [22222, 33333],
       });

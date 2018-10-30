@@ -40,13 +40,14 @@ export interface VirtualTableConfig {
   header?: boolean;
   filter?: boolean;
   pagination?: VirtualTablePaginator | boolean;
+  serverSide?: boolean;
 }
 
 export interface StreamWithEffect {
   stream: Array<VirtualTableItem | number | string | boolean>;
   effects?: {
     filter?: string;
-    sort?: string;
+    sort?: VirtualSortEffect;
     pagination?: VirtualPageChange;
   };
 }
@@ -54,4 +55,9 @@ export interface StreamWithEffect {
 export interface VirtualPageChange {
   pageSize?: number;
   pageIndex?: number;
+}
+
+export interface VirtualSortEffect {
+  sortColumn: string;
+  sortType?: sortColumn;
 }

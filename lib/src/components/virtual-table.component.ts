@@ -8,7 +8,7 @@ import {
   ChangeDetectorRef,
   HostBinding,
 } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest, Subscription, zip } from 'rxjs';
+import { Observable, EMPTY, Subject, combineLatest, Subscription, zip, Observer, of } from 'rxjs';
 import {
   map,
   startWith,
@@ -20,6 +20,7 @@ import {
   take,
   filter,
   tap,
+  switchMap,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import {
@@ -44,6 +45,8 @@ import { PageEvent, MatPaginator } from '@angular/material/paginator';
 })
 export class VirtualTableComponent {
   private _config: VirtualTableConfig;
+
+  private serverSideStrategy = false;
 
   public _oldWidth: number;
 
@@ -83,8 +86,6 @@ export class VirtualTableComponent {
   @Input() onRowClick: (item: VirtualTableItem) => void;
 
   public filterControl: FormControl = new FormControl('');
-
-  private _headerDict: { [key: string]: VirtualTableColumnInternal } = Object.create(null);
 
   public column: Array<VirtualTableColumnInternal> = [];
 
@@ -148,6 +149,7 @@ export class VirtualTableComponent {
     const columnArr = config.column;
     this.showHeader = config.header === false ? false : true;
     this.showPaginator = config.pagination ? true : false;
+    this.serverSideStrategy = config.serverSide === true ? true : false;
     this.showFirstLastButtons =
       (config && typeof config.pagination === 'object' && config.pagination.showFirstLastButtons) ||
       false;
@@ -158,7 +160,6 @@ export class VirtualTableComponent {
       (config && typeof config.pagination === 'object' && config.pagination.pageSizeOptions) ||
       this.defaultPaginationSetting.pageSizeOptions;
     if (Array.isArray(columnArr)) {
-      this._headerDict = Object.create(null);
       this.column = this.createColumnFromArray(columnArr);
     }
     if (this.showPaginator && this.paginatorDiv) {
@@ -187,18 +188,32 @@ export class VirtualTableComponent {
         })),
       ),
     ).pipe(
-      map(([stream, sort, filter, pageChange]) => ({
-        stream,
-        effects: {
-          filter,
-          sort,
-          pagination: pageChange,
-        },
-      })),
-      map((streamWithEffect) => this.sortingStream(streamWithEffect)),
-      map((streamWithEffect) => this.filterStream(streamWithEffect)),
-      map((streamWithEffect) => this.applyPagination(streamWithEffect)),
-      map((streamWithEffect) => streamWithEffect.stream),
+      map(([stream, sort, filter, pageChange]) => {
+        let sortEffect;
+        const columForSort = this.column.find((e) => e.key === sort);
+        if (!columForSort) {
+          sortEffect = undefined;
+        } else {
+          sortEffect = {
+            sortColumn: sort,
+            sortType: columForSort.sort,
+          };
+        }
+        return {
+          stream,
+          effects: {
+            filter,
+            sort: sortEffect,
+            pagination: pageChange,
+          },
+        };
+      }),
+      switchMap((streamWithEffect) => {
+        if (this.serverSideStrategy) {
+          return this.serverSideStrategyObs(streamWithEffect);
+        }
+        return this.clientSideStrategyObs(streamWithEffect);
+      }),
       publishBehavior([]),
       refCount(),
       takeUntil(this._destroyed$),
@@ -241,40 +256,68 @@ export class VirtualTableComponent {
     }
   }
 
+  private serverSideStrategyObs(
+    streamWithEffect: StreamWithEffect,
+  ): Observable<Array<VirtualTableItem | number | string | boolean>> {
+    console.log(streamWithEffect);
+    return of(streamWithEffect.stream);
+  }
+
+  private clientSideStrategyObs(
+    streamWithEffect: StreamWithEffect,
+  ): Observable<Array<VirtualTableItem | number | string | boolean>> {
+    const obs = new Observable<StreamWithEffect>((observer: Observer<StreamWithEffect>) => {
+      observer.next(streamWithEffect);
+      observer.complete();
+    }).pipe(
+      map((streamWithEffect) => this.sortingStream(streamWithEffect)),
+      map((streamWithEffect) => this.filterStream(streamWithEffect)),
+      map((streamWithEffect) => this.applyPagination(streamWithEffect)),
+      map((streamWithEffect) => streamWithEffect.stream),
+    );
+
+    return obs;
+  }
+
   public sortingStream(streamWithEffect: StreamWithEffect): StreamWithEffect {
     const sliceStream = streamWithEffect.stream.slice();
     const sort = streamWithEffect.effects && streamWithEffect.effects.sort;
-    const sortColumn = this.column.find((e) => e.key === sort);
-
-    if (!sort || !sortColumn) {
+    if (!sort) {
       return {
         stream: sliceStream,
         effects: streamWithEffect.effects,
       };
     }
 
-    if (!sortColumn.sort) {
+    const sortColumn = this.column.find((e) => e.key === sort.sortColumn);
+
+    if (!sortColumn) {
       return {
         stream: sliceStream,
         effects: streamWithEffect.effects,
       };
     }
 
-    const _sortColumn = this._headerDict[sort];
+    if (!sort.sortType) {
+      return {
+        stream: sliceStream,
+        effects: streamWithEffect.effects,
+      };
+    }
 
-    if (sortColumn.sort === 'asc') {
+    if (sort.sortType === 'asc') {
       sliceStream.sort((a, b) =>
         sortColumn.comp(
-          this.service.getElement(a, _sortColumn.func),
-          this.service.getElement(b, _sortColumn.func),
+          this.service.getElement(a, sortColumn.func),
+          this.service.getElement(b, sortColumn.func),
         ),
       );
     } else {
       sliceStream.sort(
         (a, b) =>
           -sortColumn.comp(
-            this.service.getElement(a, _sortColumn.func),
-            this.service.getElement(b, _sortColumn.func),
+            this.service.getElement(a, sortColumn.func),
+            this.service.getElement(b, sortColumn.func),
           ),
       );
     }
@@ -346,11 +389,13 @@ export class VirtualTableComponent {
     arr: Array<VirtualTableColumn | string>,
   ): Array<VirtualTableColumnInternal> {
     const columnArr = this.service.createColumnFromArray(arr);
+    const set = new Set();
     columnArr.forEach((column) => {
-      if (this._headerDict[column.key]) {
+      if (set.has(column.key)) {
         throw Error(`Column key=${column.key} already declare`);
+      } else {
+        set.add(column.key);
       }
-      this._headerDict[column.key] = column;
     });
     this._headerWasSet = true;
     return columnArr;

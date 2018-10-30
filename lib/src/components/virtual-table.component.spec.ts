@@ -591,29 +591,20 @@ describe('VirtualTableComponent', () => {
         },
       ];
 
-      component.column = [
-        {
-          name: 'Full Name',
-          key: 'age',
-          func: (e) => e.age,
-          comp: service.defaultComparator,
-          sort: 'asc',
-        },
-      ];
-
       const effects = {
-        sort: 'asdasd',
+        sort: {
+          sortColumn: 'afsafaf',
+        },
       };
 
-      (component as any)._headerDict = {
-        age: {
+      (component as any).column = [
+        {
           name: 'Full Name',
           key: 'age',
           func: (e: any) => e.age,
           comp: service.defaultComparator,
-          sort: 'asc',
         },
-      };
+      ];
 
       expect(
         component.sortingStream({
@@ -640,27 +631,20 @@ describe('VirtualTableComponent', () => {
       ];
 
       const effects = {
-        sort: 'age',
-      };
-      component.column = [
-        {
-          name: 'Full Name',
-          key: 'age',
-          func: (e) => e.age,
-          comp: service.defaultComparator,
-          sort: 'desc',
+        sort: {
+          sortColumn: 'age',
+          sortType: 'desc' as sortColumn,
         },
-      ];
+      };
 
-      (component as any)._headerDict = {
-        age: {
+      (component as any).column = [
+        {
           name: 'Full Name',
           key: 'age',
           func: (e: any) => e.age,
           comp: service.defaultComparator,
-          sort: 'desc',
         },
-      };
+      ];
 
       expect(
         component.sortingStream({
@@ -687,27 +671,20 @@ describe('VirtualTableComponent', () => {
       ];
 
       const effects = {
-        sort: 'age',
-      };
-      component.column = [
-        {
-          name: 'Full Name',
-          key: 'age',
-          func: (e) => e.age,
-          comp: service.defaultComparator,
-          sort: 'asc',
+        sort: {
+          sortColumn: 'age',
+          sortType: 'asc' as sortColumn,
         },
-      ];
+      };
 
-      (component as any)._headerDict = {
-        age: {
+      (component as any).column = [
+        {
           name: 'Full Name',
           key: 'age',
           func: (e: any) => e.age,
           comp: service.defaultComparator,
-          sort: 'asc',
         },
-      };
+      ];
       expect(
         component.sortingStream({
           stream,
@@ -733,7 +710,10 @@ describe('VirtualTableComponent', () => {
       ];
 
       const effects = {
-        sort: 'age',
+        sort: {
+          sortColumn: 'age',
+          sortType: null as sortColumn,
+        },
       };
 
       component.column = [
@@ -741,7 +721,6 @@ describe('VirtualTableComponent', () => {
           name: 'Full Name',
           key: 'age',
           func: (e) => e.age,
-          sort: null as sortColumn,
         },
       ];
       expect(

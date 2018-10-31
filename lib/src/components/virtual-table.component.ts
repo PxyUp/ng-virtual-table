@@ -153,6 +153,7 @@ export class VirtualTableComponent {
 
   applyConfig(config: VirtualTableConfig) {
     const columnArr = config.column;
+    this.showLoading = false;
     this.showHeader = config.header === false ? false : true;
     this.showPaginator = config.pagination ? true : false;
     this.serverSideStrategy = config.serverSide === true ? true : false;

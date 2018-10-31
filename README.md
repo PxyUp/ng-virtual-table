@@ -53,8 +53,18 @@ imports: [NgVirtualTableModule],
 ```
 
 ```typescript
+export type sortColumn = 'asc' | 'desc' | null | false;
 
-config:VirtualTableConfig
+
+export interface VirtualPageChange {
+  pageSize?: number; // pagination size
+  pageIndex?: number; // page index 
+}
+
+export interface VirtualSortEffect {
+  sortColumn: string; // column for sort
+  sortType?: sortColumn; // type sort
+}
 
 export interface VirtualTableColumn {
   name?: string; // Label for field, if absent will be use key
@@ -79,13 +89,24 @@ export interface VirtualTablePaginator {
   showFirstLastButtons?: boolean; //default false;
 }
 
+export interface ResponseStreamWithSize {
+  stream: Array<any>; // stream for Server Side strategy
+  totalSize: number; // total size of stream
+}
+
+export interface VirtualTableEffect {
+  filter?: string; // filter string
+  sort?: VirtualSortEffect; // sort effect
+  pagination?: VirtualPageChange; // pagination effect
+}
+
 export interface VirtualTableConfig {
   column?: Array<VirtualTableColumn>; // if config not provide will be auto generate column
   header?: boolean; // default false
   filter?: boolean; // default true
   pagination?: VirtualTablePaginator | boolean; // default false
   serverSide?: boolean; // default false;
-  serverSideResolver?: (effects: VirtualTableEffect) => Observable<Array<any>>;
+  serverSideResolver?: (effects: VirtualTableEffect) => Observable<ResponseStreamWithSize>;
 }
 
 

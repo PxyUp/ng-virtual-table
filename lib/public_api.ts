@@ -9,4 +9,6 @@ export {
   VirtualPageChange,
   VirtualTableEffect,
   ResponseStreamWithSize,
+  VirtualSortEffect,
+  sortColumn,
 } from './src/interfaces';

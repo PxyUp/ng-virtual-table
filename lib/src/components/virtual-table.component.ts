@@ -283,9 +283,9 @@ export class VirtualTableComponent {
     }).pipe(
       map((streamWithEffect) => this.sortingStream(streamWithEffect)),
       map((streamWithEffect) => this.filterStream(streamWithEffect)),
+      tap((stream) => (this.sliceSize = streamWithEffect.stream.length)),
       map((streamWithEffect) => this.applyPagination(streamWithEffect)),
       map((streamWithEffect) => streamWithEffect.stream),
-      tap((stream) => (this.sliceSize = stream.length)),
     );
 
     return obs;

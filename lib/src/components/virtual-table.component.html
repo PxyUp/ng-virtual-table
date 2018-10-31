@@ -31,7 +31,10 @@
       <mat-icon (click)="toggleFilter()">{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>
     </div>
   </div>
-  <div class="virtual-table-content">
+  <div *ngIf="showLoading" class="virtual-table-loader">
+    <mat-spinner color="primary"></mat-spinner>
+  </div>
+  <div *ngIf="!showLoading" class="virtual-table-content">
     <cdk-virtual-scroll-viewport *ngIf="dataArray && dataArray.length > 0; else emptyContainer" [itemSize]="itemSize">
       <div *cdkVirtualFor="let item of dataArray;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
         <div *ngFor="let headerItem of column" [style.maxWidth.px]="headerItem.width" class="virtual-table-column">
@@ -52,8 +55,8 @@
     </ng-template>
   </div>
   <div *ngIf="showPaginator" class="virtual-table-bottom">
-    <mat-paginator [length]="sliceSize || 0" [pageSize]="paginationPageSize" [showFirstLastButtons]="showFirstLastButtons" (page)="onPageChange($event)"
-      [pageSizeOptions]="paginationPageOptions">
+    <mat-paginator [length]="sliceSize || 0" [pageSize]="paginationPageSize" [showFirstLastButtons]="showFirstLastButtons"
+      (page)="onPageChange($event)" [pageSizeOptions]="paginationPageOptions">
     </mat-paginator>
   </div>
 </div>

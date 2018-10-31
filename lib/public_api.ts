@@ -7,4 +7,6 @@ export {
   VirtualTableColumnComponent,
   VirtualTablePaginator,
   VirtualPageChange,
+  VirtualTableEffect,
+  ResponseStreamWithSize,
 } from './src/interfaces';

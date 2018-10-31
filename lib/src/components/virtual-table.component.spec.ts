@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ScrollDispatchModule,
   CdkVirtualForOf,
@@ -13,11 +14,11 @@ import {
 import { DragDropModule, CdkDragDrop, CdkDragMove } from '@angular/cdk/drag-drop';
 import { DynamicModule } from 'ng-dynamic-component';
 import { VirtualTableConfig, VirtualTableColumnInternal, sortColumn } from '../interfaces';
-import { of, Observable } from 'rxjs';
+import { of, Observable, Observer } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { SimpleChange, DebugElement, EmbeddedViewRef } from '@angular/core';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { skip } from 'rxjs/operators';
+import { skip, delay } from 'rxjs/operators';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -58,6 +59,7 @@ describe('VirtualTableComponent', () => {
           MatFormFieldModule,
           ScrollDispatchModule,
           MatPaginatorModule,
+          MatProgressSpinnerModule,
           DragDropModule,
           DynamicModule.withComponents([]),
         ],
@@ -394,7 +396,7 @@ describe('VirtualTableComponent', () => {
           age: 333333,
         },
       ];
-      component.showPaginator = true;
+
       expect(
         component.applyPagination({
           stream,
@@ -428,7 +430,7 @@ describe('VirtualTableComponent', () => {
           age: 333333,
         },
       ];
-      component.showPaginator = true;
+
       expect(
         component.applyPagination({
           stream,
@@ -461,15 +463,12 @@ describe('VirtualTableComponent', () => {
           age: 333333,
         },
       ];
-      component.showPaginator = false;
+
       expect(
         component.applyPagination({
           stream,
           effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
+            pagination: undefined,
           },
         }),
       ).toEqual({
@@ -480,88 +479,20 @@ describe('VirtualTableComponent', () => {
           },
         ],
         effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
+          pagination: undefined,
         },
       });
 
       const stream1 = Array(10000).fill(0).map((e) => 5);
-      component.showPaginator = false;
+
       expect(
         component.applyPagination({
           stream: stream1,
-          effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
-          },
+          effects: {},
         }),
       ).toEqual({
         stream: stream1,
-        effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
-        },
-      });
-    });
-
-    it('should return all of stream without showPaginator', () => {
-      const stream = [
-        { age: 22222 },
-        {
-          age: 333333,
-        },
-      ];
-      expect(
-        component.applyPagination({
-          stream,
-          effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
-          },
-        }),
-      ).toEqual({
-        stream: [
-          { age: 22222 },
-          {
-            age: 333333,
-          },
-        ],
-        effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
-        },
-      });
-
-      const stream1 = Array(10000).fill(0).map((e) => 5);
-      component.showPaginator = false;
-      expect(
-        component.applyPagination({
-          stream: stream1,
-          effects: {
-            pagination: {
-              pageSize: 1,
-              pageIndex: 0,
-            },
-          },
-        }),
-      ).toEqual({
-        stream: stream1,
-        effects: {
-          pagination: {
-            pageSize: 1,
-            pageIndex: 0,
-          },
-        },
+        effects: {},
       });
     });
   });
@@ -591,29 +522,20 @@ describe('VirtualTableComponent', () => {
         },
       ];
 
-      component.column = [
-        {
-          name: 'Full Name',
-          key: 'age',
-          func: (e) => e.age,
-          comp: service.defaultComparator,
-          sort: 'asc',
-        },
-      ];
-
       const effects = {
-        sort: 'asdasd',
+        sort: {
+          sortColumn: 'afsafaf',
+        },
       };
 
-      (component as any)._headerDict = {
-        age: {
+      (component as any).column = [
+        {
           name: 'Full Name',
           key: 'age',
           func: (e: any) => e.age,
           comp: service.defaultComparator,
-          sort: 'asc',
         },
-      };
+      ];
 
       expect(
         component.sortingStream({
@@ -640,27 +562,20 @@ describe('VirtualTableComponent', () => {
       ];
 
       const effects = {
-        sort: 'age',
-      };
-      component.column = [
-        {
-          name: 'Full Name',
-          key: 'age',
-          func: (e) => e.age,
-          comp: service.defaultComparator,
-          sort: 'desc',
+        sort: {
+          sortColumn: 'age',
+          sortType: 'desc' as sortColumn,
         },
-      ];
+      };
 
-      (component as any)._headerDict = {
-        age: {
+      (component as any).column = [
+        {
           name: 'Full Name',
           key: 'age',
           func: (e: any) => e.age,
           comp: service.defaultComparator,
-          sort: 'desc',
         },
-      };
+      ];
 
       expect(
         component.sortingStream({
@@ -687,27 +602,20 @@ describe('VirtualTableComponent', () => {
       ];
 
       const effects = {
-        sort: 'age',
-      };
-      component.column = [
-        {
-          name: 'Full Name',
-          key: 'age',
-          func: (e) => e.age,
-          comp: service.defaultComparator,
-          sort: 'asc',
+        sort: {
+          sortColumn: 'age',
+          sortType: 'asc' as sortColumn,
         },
-      ];
+      };
 
-      (component as any)._headerDict = {
-        age: {
+      (component as any).column = [
+        {
           name: 'Full Name',
           key: 'age',
           func: (e: any) => e.age,
           comp: service.defaultComparator,
-          sort: 'asc',
         },
-      };
+      ];
       expect(
         component.sortingStream({
           stream,
@@ -733,7 +641,10 @@ describe('VirtualTableComponent', () => {
       ];
 
       const effects = {
-        sort: 'age',
+        sort: {
+          sortColumn: 'age',
+          sortType: null as sortColumn,
+        },
       };
 
       component.column = [
@@ -741,7 +652,6 @@ describe('VirtualTableComponent', () => {
           name: 'Full Name',
           key: 'age',
           func: (e) => e.age,
-          sort: null as sortColumn,
         },
       ];
       expect(
@@ -955,6 +865,133 @@ describe('VirtualTableComponent', () => {
   });
 
   describe('applyConfig', () => {
+    it(
+      'should execute serverSideStrategyObs',
+      fakeAsync(() => {
+        const fn = (eff: any) => {
+          const mock = Observable.create((o) => {
+            o.next({
+              stream: [1, 2, 3],
+              totalSize: 3,
+            });
+            o.complete();
+          }).pipe(delay(1000));
+          return mock;
+        };
+
+        const config: VirtualTableConfig = {
+          header: false,
+          serverSide: true,
+          serverSideResolver: fn,
+          pagination: true,
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        component.config = config;
+        (component as any).serverSideStrategyObs = jest.fn((e) => of([1, 2, 3]));
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+        });
+        fixture.detectChanges();
+        tick(1);
+        expect((component as any).serverSideStrategyObs).toBeCalled();
+      }),
+    );
+
+    it(
+      'should serverSideStrategyObs throw error',
+      fakeAsync(() => {
+        const fn = (eff: any) => {
+          const mock = Observable.create((o) => {
+            o.next({
+              stream: [1, 2, 3],
+              totalSize: 3,
+            });
+            o.complete();
+          }).pipe(delay(1000));
+          return mock;
+        };
+
+        const config: VirtualTableConfig = {
+          header: false,
+          serverSide: true,
+          //serverSideResolver: mock,
+          pagination: true,
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        component.config = config;
+        try {
+          component.ngOnChanges({
+            config: new SimpleChange(null, component.config, false),
+          });
+          fixture.detectChanges();
+          tick(1);
+        } catch (e) {
+          expect(e.message).toBe('You use serverSide, serverSideResolver must be exist!');
+        }
+      }),
+    );
+
+    it(
+      'should serverSideStrategyObs apply params',
+      fakeAsync(() => {
+        const fn = (eff: any) => {
+          const mock = Observable.create((o) => {
+            o.next({
+              stream: [1, 2, 3],
+              totalSize: 3,
+            });
+            o.complete();
+          }).pipe(delay(1000));
+          return mock;
+        };
+
+        const config: VirtualTableConfig = {
+          header: false,
+          serverSide: true,
+          serverSideResolver: fn,
+          pagination: true,
+          column: [
+            {
+              key: 'name',
+              name: 'Full name',
+              resizable: false,
+              sort: 'asc',
+              func: (e) => e.age,
+            },
+          ],
+        };
+
+        component.config = config;
+        component.ngOnChanges({
+          config: new SimpleChange(null, component.config, false),
+        });
+        fixture.detectChanges();
+        tick(1);
+        expect(component.showLoading).toBe(true);
+        tick(1000);
+        expect(component.showLoading).toBe(false);
+        expect(component.sliceSize).toBe(3);
+      }),
+    );
+
     it(
       'should apply config with paginator',
       fakeAsync(() => {

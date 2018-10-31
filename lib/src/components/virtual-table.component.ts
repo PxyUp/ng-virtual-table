@@ -8,7 +8,7 @@ import {
   ChangeDetectorRef,
   HostBinding,
 } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest, Subscription, zip } from 'rxjs';
+import { Observable, EMPTY, Subject, combineLatest, Subscription, zip, Observer, of } from 'rxjs';
 import {
   map,
   startWith,
@@ -20,6 +20,7 @@ import {
   take,
   filter,
   tap,
+  switchMap,
 } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import {
@@ -30,6 +31,8 @@ import {
   StreamWithEffect,
   VirtualTablePaginator,
   VirtualPageChange,
+  ResponseStreamWithSize,
+  VirtualTableEffect,
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
@@ -44,6 +47,10 @@ import { PageEvent, MatPaginator } from '@angular/material/paginator';
 })
 export class VirtualTableComponent {
   private _config: VirtualTableConfig;
+
+  private serverSideStrategy = false;
+
+  public showLoading = false;
 
   public _oldWidth: number;
 
@@ -84,8 +91,6 @@ export class VirtualTableComponent {
 
   public filterControl: FormControl = new FormControl('');
 
-  private _headerDict: { [key: string]: VirtualTableColumnInternal } = Object.create(null);
-
   public column: Array<VirtualTableColumnInternal> = [];
 
   public _dataStream: Observable<Array<VirtualTableItem | number | string | boolean>>;
@@ -93,6 +98,8 @@ export class VirtualTableComponent {
   private sort$: Subject<string> = new Subject<string>();
 
   private _destroyed$ = new Subject<void>();
+
+  private effectChanged$ = new Subject<void>();
 
   @HostBinding('class.with-header') public showHeader = true;
 
@@ -146,8 +153,10 @@ export class VirtualTableComponent {
 
   applyConfig(config: VirtualTableConfig) {
     const columnArr = config.column;
+    this.showLoading = false;
     this.showHeader = config.header === false ? false : true;
     this.showPaginator = config.pagination ? true : false;
+    this.serverSideStrategy = config.serverSide === true ? true : false;
     this.showFirstLastButtons =
       (config && typeof config.pagination === 'object' && config.pagination.showFirstLastButtons) ||
       false;
@@ -158,7 +167,6 @@ export class VirtualTableComponent {
       (config && typeof config.pagination === 'object' && config.pagination.pageSizeOptions) ||
       this.defaultPaginationSetting.pageSizeOptions;
     if (Array.isArray(columnArr)) {
-      this._headerDict = Object.create(null);
       this.column = this.createColumnFromArray(columnArr);
     }
     if (this.showPaginator && this.paginatorDiv) {
@@ -187,18 +195,20 @@ export class VirtualTableComponent {
         })),
       ),
     ).pipe(
-      map(([stream, sort, filter, pageChange]) => ({
-        stream,
-        effects: {
-          filter,
-          sort,
-          pagination: pageChange,
-        },
-      })),
-      map((streamWithEffect) => this.sortingStream(streamWithEffect)),
-      map((streamWithEffect) => this.filterStream(streamWithEffect)),
-      map((streamWithEffect) => this.applyPagination(streamWithEffect)),
-      map((streamWithEffect) => streamWithEffect.stream),
+      map(([stream, sort, filter, pageChange]) => {
+        const effect = this.createEffect(sort, filter, pageChange);
+        this.effectChanged$.next();
+        return {
+          stream,
+          effects: effect,
+        };
+      }),
+      switchMap((streamWithEffect) => {
+        if (this.serverSideStrategy) {
+          return this.serverSideStrategyObs(streamWithEffect);
+        }
+        return this.clientSideStrategyObs(streamWithEffect);
+      }),
       publishBehavior([]),
       refCount(),
       takeUntil(this._destroyed$),
@@ -235,46 +245,119 @@ export class VirtualTableComponent {
       this.applyConfig(this._config);
     }
 
+    if (this.serverSideStrategy) {
+      this.applyDatasource(EMPTY.pipe(startWith([]), takeUntil(this._destroyed$)));
+      return;
+    }
+
     if ('dataSource' in changes) {
       const newDataSource = changes.dataSource.currentValue as Observable<Array<VirtualTableItem>>;
       this.applyDatasource(newDataSource.pipe(takeUntil(this._destroyed$)));
     }
   }
 
+  private serverSideStrategyObs(
+    streamWithEffect: StreamWithEffect,
+  ): Observable<Array<VirtualTableItem | number | string | boolean>> {
+    this.showLoading = true;
+    if (!this._config.serverSideResolver) {
+      throw new Error('You use serverSide, serverSideResolver must be exist!');
+    }
+    const obs = this._config.serverSideResolver(streamWithEffect.effects);
+    return obs.pipe(
+      tap((response) => {
+        this.showLoading = false;
+        this.sliceSize = response.totalSize;
+      }),
+      map((response) => response.stream),
+      takeUntil(this.effectChanged$),
+    );
+  }
+
+  private clientSideStrategyObs(
+    streamWithEffect: StreamWithEffect,
+  ): Observable<Array<VirtualTableItem | number | string | boolean>> {
+    const obs = new Observable<StreamWithEffect>((observer: Observer<StreamWithEffect>) => {
+      observer.next(streamWithEffect);
+      observer.complete();
+    }).pipe(
+      map((streamWithEffect) => this.sortingStream(streamWithEffect)),
+      map((streamWithEffect) => this.filterStream(streamWithEffect)),
+      map((streamWithEffect) => this.applyPagination(streamWithEffect)),
+      map((streamWithEffect) => streamWithEffect.stream),
+      tap((stream) => (this.sliceSize = stream.length)),
+    );
+
+    return obs;
+  }
+
+  private createEffect(
+    sort: string,
+    filter: string,
+    pageChange: VirtualPageChange,
+  ): VirtualTableEffect {
+    let sortEffect;
+    let pagginationEffect;
+    const columForSort = this.column.find((e) => e.key === sort);
+    if (!this.showPaginator) {
+      pagginationEffect = undefined;
+    } else {
+      pagginationEffect = pageChange;
+    }
+    if (!columForSort) {
+      sortEffect = undefined;
+    } else {
+      sortEffect = {
+        sortColumn: sort,
+        sortType: columForSort.sort,
+      };
+    }
+    return {
+      filter,
+      sort: sortEffect,
+      pagination: pagginationEffect,
+    };
+  }
+
   public sortingStream(streamWithEffect: StreamWithEffect): StreamWithEffect {
     const sliceStream = streamWithEffect.stream.slice();
     const sort = streamWithEffect.effects && streamWithEffect.effects.sort;
-    const sortColumn = this.column.find((e) => e.key === sort);
-
-    if (!sort || !sortColumn) {
+    if (!sort) {
       return {
         stream: sliceStream,
         effects: streamWithEffect.effects,
       };
     }
 
-    if (!sortColumn.sort) {
+    const sortColumn = this.column.find((e) => e.key === sort.sortColumn);
+
+    if (!sortColumn) {
       return {
         stream: sliceStream,
         effects: streamWithEffect.effects,
       };
     }
 
-    const _sortColumn = this._headerDict[sort];
+    if (!sort.sortType) {
+      return {
+        stream: sliceStream,
+        effects: streamWithEffect.effects,
+      };
+    }
 
-    if (sortColumn.sort === 'asc') {
+    if (sort.sortType === 'asc') {
       sliceStream.sort((a, b) =>
         sortColumn.comp(
-          this.service.getElement(a, _sortColumn.func),
-          this.service.getElement(b, _sortColumn.func),
+          this.service.getElement(a, sortColumn.func),
+          this.service.getElement(b, sortColumn.func),
         ),
       );
     } else {
       sliceStream.sort(
         (a, b) =>
           -sortColumn.comp(
-            this.service.getElement(a, _sortColumn.func),
-            this.service.getElement(b, _sortColumn.func),
+            this.service.getElement(a, sortColumn.func),
+            this.service.getElement(b, sortColumn.func),
           ),
       );
     }
@@ -315,13 +398,12 @@ export class VirtualTableComponent {
   public applyPagination(streamWithEffect: StreamWithEffect): StreamWithEffect {
     const stream = streamWithEffect.stream;
     const pagination = streamWithEffect.effects && streamWithEffect.effects.pagination;
-    if (!this.showPaginator) {
+    if (!pagination) {
       return {
         stream: stream.slice(),
         effects: streamWithEffect.effects,
       };
     }
-    this.sliceSize = stream.length;
     const pageSize = pagination.pageSize || this.defaultPaginationSetting.pageSize;
     const pageIndex = pagination.pageIndex;
     const sliceStream = stream.slice(
@@ -346,11 +428,13 @@ export class VirtualTableComponent {
     arr: Array<VirtualTableColumn | string>,
   ): Array<VirtualTableColumnInternal> {
     const columnArr = this.service.createColumnFromArray(arr);
+    const set = new Set();
     columnArr.forEach((column) => {
-      if (this._headerDict[column.key]) {
+      if (set.has(column.key)) {
         throw Error(`Column key=${column.key} already declare`);
+      } else {
+        set.add(column.key);
       }
-      this._headerDict[column.key] = column;
     });
     this._headerWasSet = true;
     return columnArr;

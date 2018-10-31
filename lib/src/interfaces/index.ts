@@ -1,4 +1,5 @@
 import { Type } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export interface VirtualTableItem {
   [key: string]: any;
@@ -40,18 +41,31 @@ export interface VirtualTableConfig {
   header?: boolean;
   filter?: boolean;
   pagination?: VirtualTablePaginator | boolean;
+  serverSide?: boolean;
+  serverSideResolver?: (effects: VirtualTableEffect) => Observable<ResponseStreamWithSize>;
 }
 
+export interface ResponseStreamWithSize {
+  stream: Array<any>;
+  totalSize: number;
+}
 export interface StreamWithEffect {
   stream: Array<VirtualTableItem | number | string | boolean>;
-  effects?: {
-    filter?: string;
-    sort?: string;
-    pagination?: VirtualPageChange;
-  };
+  effects?: VirtualTableEffect;
+}
+
+export interface VirtualTableEffect {
+  filter?: string;
+  sort?: VirtualSortEffect;
+  pagination?: VirtualPageChange;
 }
 
 export interface VirtualPageChange {
   pageSize?: number;
   pageIndex?: number;
+}
+
+export interface VirtualSortEffect {
+  sortColumn: string;
+  sortType?: sortColumn;
 }

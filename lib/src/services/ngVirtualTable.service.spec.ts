@@ -58,7 +58,7 @@ describe('NgVirtualTableService', () => {
         name: 5,
       };
 
-      expect(service.getElement(item, (e) => e.name)).toBe(5);
+      expect(service.getElement(item, (e: any) => e.name)).toBe(5);
 
       const item2 = {
         name: 5,
@@ -71,8 +71,8 @@ describe('NgVirtualTableService', () => {
         },
       };
 
-      expect(service.getElement(item, (e) => e.name)).toBe(5);
-      expect(service.getElement(item2, (e) => e.label.test.test.test)).toBe('name');
+      expect(service.getElement(item, (e: any) => e.name)).toBe(5);
+      expect(service.getElement(item2, (e: any) => e.label.test.test.test)).toBe('name');
     });
   });
 

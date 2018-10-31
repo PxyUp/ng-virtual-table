@@ -84,6 +84,8 @@ export interface VirtualTableConfig {
   header?: boolean; // default false
   filter?: boolean; // default true
   pagination?: VirtualTablePaginator | boolean; // default false
+  serverSide?: boolean; // default false;
+  serverSideResolver?: (effects: VirtualTableEffect) => Observable<Array<any>>;
 }
 
 

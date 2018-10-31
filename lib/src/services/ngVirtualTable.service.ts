@@ -54,9 +54,9 @@ export class NgVirtualTableService {
 
   public getElement(
     item: VirtualTableItem | number | string | boolean,
-    func: (item: VirtualTableItem) => any,
+    func: (item: VirtualTableItem | number | string | boolean) => any,
   ) {
-    return func.call(null, item);
+    return func(item);
   }
 
   public setSortOnColumnArray(

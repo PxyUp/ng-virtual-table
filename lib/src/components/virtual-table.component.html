@@ -28,7 +28,9 @@
     </div>
     <div *ngIf="config && config.filter" class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">
       <input #inputFilterFocus class="filter-spot-input" matInput [placeholder]="filterPlaceholder" [formControl]="filterControl">
-      <mat-icon (click)="toggleFilter()">{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>
+      <button mat-icon-button (click)="toggleFilter()">
+        <mat-icon>{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>
+      </button>
     </div>
   </div>
   <div *ngIf="showLoading" class="virtual-table-loader">

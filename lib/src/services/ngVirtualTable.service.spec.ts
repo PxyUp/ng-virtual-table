@@ -4,7 +4,8 @@ import { sortColumn, VirtualTableColumn } from '../interfaces';
 import { Input } from '@angular/core';
 
 export class InfoComponent {
-  @Input() name: string;
+  @Input()
+  name: string;
 
   constructor() {}
 }
@@ -78,7 +79,7 @@ describe('NgVirtualTableService', () => {
 
   describe('createColumnFromConfigColumn', () => {
     it('should create item from string', () => {
-      let createMock = {
+      const createMock = {
         name: 'key',
         key: 'key',
         func: expect.any(Function),
@@ -96,7 +97,7 @@ describe('NgVirtualTableService', () => {
       function getData(item: any) {
         return item;
       }
-      let mock2 = {
+      const mock2 = {
         name: 'Full Name',
         key: 'age2',
         func: getData,
@@ -129,7 +130,7 @@ describe('NgVirtualTableService', () => {
     });
 
     it('should create default for `func`', () => {
-      let mock2 = {
+      const mock2 = {
         name: 'Full Name',
         key: 'age2',
         func: expect.any(Function),
@@ -173,7 +174,7 @@ describe('NgVirtualTableService', () => {
     });
 
     it('should create item from object', () => {
-      let mock = {
+      const mock = {
         name: 'Full name',
         key: 'name',
         func: expect.any(Function),
@@ -191,7 +192,7 @@ describe('NgVirtualTableService', () => {
         }),
       ).toEqual(mock);
 
-      let mock2 = {
+      const mock2 = {
         name: 'Full Name',
         key: 'age2',
         func: expect.any(Function),
@@ -222,7 +223,7 @@ describe('NgVirtualTableService', () => {
         }),
       ).toEqual(mock2);
 
-      let mock3 = {
+      const mock3 = {
         name: 'Full Name',
         key: 'age2',
         func: expect.any(Function),
@@ -254,7 +255,7 @@ describe('NgVirtualTableService', () => {
         }),
       ).toEqual(mock3);
 
-      let mock4 = {
+      const mock4 = {
         name: 'Full Name',
         key: 'age2',
         func: expect.any(Function),
@@ -276,7 +277,7 @@ describe('NgVirtualTableService', () => {
         }),
       ).toEqual(mock4);
 
-      let mock5 = {
+      const mock5 = {
         name: 'age2',
         key: 'age2',
         func: expect.any(Function),
@@ -561,7 +562,7 @@ describe('NgVirtualTableService', () => {
 
     describe('createColumnFromArray', () => {
       it('should return array of column', () => {
-        let mock2 = [
+        const mock2 = [
           {
             name: 'Full Name',
             key: 'age2',

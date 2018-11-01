@@ -29,7 +29,7 @@ export class NgVirtualTableService {
       return {
         name: item,
         key: item,
-        func: (e) => e[item],
+        func: e => e[item],
         comp: this.defaultComparator,
         sort: null,
         resizable: true,
@@ -60,11 +60,11 @@ export class NgVirtualTableService {
   }
 
   public setSortOnColumnArray(
-    sortColumn: string,
+    sortColumnString: string,
     arr: Array<VirtualTableColumnInternal>,
   ): Array<VirtualTableColumnInternal> {
-    return arr.map((item) => {
-      if (item.key !== sortColumn) {
+    return arr.map(item => {
+      if (item.key !== sortColumnString) {
         return {
           ...item,
           sort: (item.sort === false ? false : null) as sortColumn,
@@ -108,7 +108,7 @@ export class NgVirtualTableService {
       return answer;
     }
 
-    Object.keys(input).forEach((key) => {
+    Object.keys(input).forEach(key => {
       if (typeof input[key] === 'function') {
         answer[key] = this.getElement(item, input[key]);
         return;

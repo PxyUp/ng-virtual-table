@@ -14,6 +14,9 @@
       "@angular/*": [
         "./node_modules/@angular/*"
       ]
-    }
-  }
+    },
+  },
+  "exclude": [
+    "appTest/**/*"
+  ]
 }

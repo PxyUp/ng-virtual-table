@@ -1,7 +1,17 @@
 <div class="table">
-  <div *ngIf="showHeader" class="header" #headerDiv cdkDropList cdkDropListOrientation="horizontal"
-    (cdkDropListDropped)="dropColumn($event)">
-    <div cdkDropList *ngFor="let headerItem of column; let index = index" class="header-item" [style.maxWidth.px]="headerItem.width"
+  <div
+    *ngIf="showHeader"
+    class="header"
+    #headerDiv
+    cdkDropList
+    cdkDropListOrientation="horizontal"
+    (cdkDropListDropped)="dropColumn($event)"
+  >
+    <div
+      cdkDropList
+      *ngFor="let headerItem of column; let index = index"
+      class="header-item"
+      [style.maxWidth.px]="headerItem.width"
       [ngClass]="{
       'not-clickable': headerItem.sort === false,
       'asc': headerItem.sort === 'asc',
@@ -10,24 +20,47 @@
       'active': headerItem.activeResize,
       'draggable': headerItem.draggable
       }"
-      (click)="headerItem.sort !== false && applySort(headerItem.key)" cdkDrag (cdkDragEnded)="headerItemDragFinished()"
-      (cdkDragStarted)="headerItemDragStarted()" (mousedown)="!headerItem.draggable && mouseDownBlock($event)"
-      (touchstart)="!headerItem.draggable && mouseDownBlock($event)">
+      (click)="headerItem.sort !== false && applySort(headerItem.key)"
+      cdkDrag
+      (cdkDragEnded)="headerItemDragFinished()"
+      (cdkDragStarted)="headerItemDragStarted()"
+      (mousedown)="!headerItem.draggable && mouseDownBlock($event)"
+      (touchstart)="!headerItem.draggable && mouseDownBlock($event)"
+    >
       <div class="title">
         <div *ngIf="headerItem.draggable" class="drag-order-handle">
           <svg width="18px" fill="currentColor" cdkDragHandle viewBox="0 0 24 24">
-            <path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>
+            <path
+              d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"
+            ></path>
             <path d="M0 0h24v24H0z" fill="none"></path>
           </svg>
         </div>
         {{ headerItem.name }}
       </div>
-      <div class="grabber" *ngIf="headerItem.resizable" (click)="$event.stopPropagation()" cdkDragLockAxis="x" cdkDrag
-        (cdkDragStarted)="resizeStart(headerItem, index)" (cdkDragEnded)="resizeEnd(headerItem)" (cdkDragMoved)="resizingEvent($event, headerItem)">
-      </div>
+      <div
+        class="grabber"
+        *ngIf="headerItem.resizable"
+        (click)="$event.stopPropagation()"
+        cdkDragLockAxis="x"
+        cdkDrag
+        (cdkDragStarted)="resizeStart(headerItem, index)"
+        (cdkDragEnded)="resizeEnd(headerItem)"
+        (cdkDragMoved)="resizingEvent($event, headerItem)"
+      ></div>
     </div>
-    <div *ngIf="config && config.filter" class="filter-spot" [ngClass]="[filterIsOpen ? 'open' : '']">
-      <input #inputFilterFocus class="filter-spot-input" matInput [placeholder]="filterPlaceholder" [formControl]="filterControl">
+    <div
+      *ngIf="config && config.filter"
+      class="filter-spot"
+      [ngClass]="[filterIsOpen ? 'open' : '']"
+    >
+      <input
+        #inputFilterFocus
+        class="filter-spot-input"
+        matInput
+        [placeholder]="filterPlaceholder"
+        [formControl]="filterControl"
+      >
       <mat-icon (click)="toggleFilter()">{{ filterIsOpen ? 'close' : 'filter_list' }}</mat-icon>
     </div>
   </div>
@@ -35,28 +68,44 @@
     <mat-spinner color="primary"></mat-spinner>
   </div>
   <div *ngIf="!showLoading" class="virtual-table-content">
-    <cdk-virtual-scroll-viewport *ngIf="dataArray && dataArray.length > 0; else emptyContainer" [itemSize]="itemSize">
-      <div *cdkVirtualFor="let item of dataArray;templateCacheSize: 0" class="virtual-table-row" (click)="clickItem(item)">
-        <div *ngFor="let headerItem of column" [style.maxWidth.px]="headerItem.width" class="virtual-table-column">
-          <ng-container *ngIf="!headerItem.component;else dynamic">
-            {{ getElement(item, headerItem.func) }}
-          </ng-container>
+    <cdk-virtual-scroll-viewport
+      *ngIf="dataArray && dataArray.length > 0; else emptyContainer"
+      [itemSize]="itemSize"
+    >
+      <div
+        *cdkVirtualFor="let item of dataArray;templateCacheSize: 0"
+        class="virtual-table-row"
+        (click)="clickItem(item)"
+      >
+        <div
+          *ngFor="let headerItem of column"
+          [style.maxWidth.px]="headerItem.width"
+          class="virtual-table-column"
+        >
+          <ng-container
+            *ngIf="!headerItem.component;else dynamic"
+          >{{ getElement(item, headerItem.func) }}</ng-container>
           <ng-template #dynamic>
-            <ndc-dynamic [ndcDynamicComponent]="headerItem.component.componentConstructor" [ndcDynamicInputs]="transformDynamicInput(headerItem.component.inputs, item)"
-              [ndcDynamicOutputs]="headerItem.component.outputs || {}"></ndc-dynamic>
+            <ndc-dynamic
+              [ndcDynamicComponent]="headerItem.component.componentConstructor"
+              [ndcDynamicInputs]="transformDynamicInput(headerItem.component.inputs, item)"
+              [ndcDynamicOutputs]="headerItem.component.outputs || {}"
+            ></ndc-dynamic>
           </ng-template>
         </div>
       </div>
     </cdk-virtual-scroll-viewport>
     <ng-template #emptyContainer>
-      <div class="virtual-table-content-empty">
-        {{ dataSetEmptyPlaceholder }}
-      </div>
+      <div class="virtual-table-content-empty">{{ dataSetEmptyPlaceholder }}</div>
     </ng-template>
   </div>
   <div *ngIf="showPaginator" class="virtual-table-bottom">
-    <mat-paginator [length]="sliceSize || 0" [pageSize]="paginationPageSize" [showFirstLastButtons]="showFirstLastButtons"
-      (page)="onPageChange($event)" [pageSizeOptions]="paginationPageOptions">
-    </mat-paginator>
+    <mat-paginator
+      [length]="sliceSize || 0"
+      [pageSize]="paginationPageSize"
+      [showFirstLastButtons]="showFirstLastButtons"
+      (page)="onPageChange($event)"
+      [pageSizeOptions]="paginationPageOptions"
+    ></mat-paginator>
   </div>
 </div>

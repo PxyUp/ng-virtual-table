@@ -8,21 +8,47 @@
   "license": "MIT",
   "scripts": {
     "build": "ng-packagr -p package.json",
-    "ct": "git add --all && git-cz",
+    "ct": "git-cz",
     "pretest": "yarn cleancoverage",
-    "commitmsg": "commitlint -E GIT_PARAMS",
     "test": "jest",
     "test:ci": "jest --runInBand --coverage",
     "test:report": "cd coverage && codecov",
-    "cleancoverage": "rimraf coverage"
+    "cleancoverage": "rimraf coverage",
+    "format:code": "prettier --write \"lib/src/**/*.{ts,js,?css,json}\"",
+    "format:html": "prettyhtml \"lib/src/**/*.html\"",
+    "format": "npm-run-all -p format:code format:html"
   },
-  "pre-push": ["test"],
   "ngPackage": {
     "lib": {
       "entryFile": "./lib/public_api.ts"
     },
     "cssUrl": "inline",
-    "whitelistedNonPeerDependencies": ["angular", "rxjs", "ng-dynamic-component"]
+    "whitelistedNonPeerDependencies": [
+      "angular",
+      "rxjs",
+      "ng-dynamic-component"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "test",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "lib/src/**/*.{ts,js,?css,json}": [
+      "prettier --write",
+      "git add"
+    ],
+    "lib/src/**/*.{ts,js}": [
+      "tslint -p tsconfig.json -c tslint.json --fix",
+      "git add"
+    ],
+    "lib/src/**/*.html": [
+      "prettyhtml",
+      "git add"
+    ]
   },
   "devDependencies": {
     "@angular/animations": "^7.0.0",
@@ -37,18 +63,26 @@
     "@angular/platform-browser": "^7.0.0",
     "@angular/platform-browser-dynamic": "^7.0.1",
     "@commitlint/config-conventional": "^7.1.2",
+    "@starptech/prettyhtml": "^0.5.1",
     "@types/jest": "^23.3.7",
     "codecov": "^3.1.0",
+    "codelyzer": "^4.5.0",
     "commitizen": "^3.0.4",
+    "commitlint": "^7.2.1",
+    "husky": "^1.1.2",
     "jest": "^23.6.0",
     "jest-preset-angular": "^6.0.1",
+    "lint-staged": "^8.0.4",
     "ng-packagr": "^4.3.1",
-    "pre-push": "^0.1.1",
+    "npm-run-all": "^4.1.3",
+    "prettier": "^1.14.3",
     "rimraf": "^2.6.2",
     "rxjs": "^6.3.3",
+    "rxjs-tslint-rules": "^4.10.0",
     "scss-bundle": "^2.4.0",
     "ts-jest": "^23.10.4",
     "tsickle": "^0.33.0",
+    "tslint": "^5.11.0",
     "typescript": "^3.1.3",
     "zone.js": "~0.8.26"
   },
@@ -58,9 +92,15 @@
     }
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"],
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
     "rules": {
-      "header-max-length": [2, "always", 80]
+      "header-max-length": [
+        2,
+        "always",
+        80
+      ]
     }
   },
   "keywords": [
@@ -94,7 +134,10 @@
       "__TRANSFORM_HTML__": true
     },
     "coverageDirectory": "<rootDir>/coverage",
-    "collectCoverageFrom": ["lib/src/**/*.ts", "!lib/src/ngVirtualTable.module.ts"],
+    "collectCoverageFrom": [
+      "lib/src/**/*.ts",
+      "!lib/src/ngVirtualTable.module.ts"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 80,
@@ -106,9 +149,16 @@
     "transform": {
       "^.+\\.(ts|html)$": "jest-preset-angular/preprocessor.js"
     },
-    "transformIgnorePatterns": ["node_modules/(?!@ngrx)"],
+    "transformIgnorePatterns": [
+      "node_modules/(?!@ngrx)"
+    ],
     "preset": "jest-preset-angular",
     "setupTestFrameworkScriptFile": "<rootDir>/setupJest.ts",
-    "testPathIgnorePatterns": ["/dist/", "/node_modules/", "/appTest/", "/docs"]
+    "testPathIgnorePatterns": [
+      "/dist/",
+      "/node_modules/",
+      "/appTest/",
+      "/docs"
+    ]
   }
 }

@@ -7,6 +7,8 @@ import {
   ElementRef,
   ChangeDetectorRef,
   HostBinding,
+  OnChanges,
+  OnDestroy,
 } from '@angular/core';
 import { Observable, EMPTY, Subject, combineLatest, Subscription, zip, Observer, of } from 'rxjs';
 import {
@@ -45,7 +47,7 @@ import { PageEvent, MatPaginator } from '@angular/material/paginator';
   styleUrls: ['./virtual-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VirtualTableComponent {
+export class VirtualTableComponent implements OnChanges, OnDestroy {
   private _config: VirtualTableConfig;
 
   private serverSideStrategy = false;
@@ -69,25 +71,35 @@ export class VirtualTableComponent {
     pageSizeOptions: [5, 10, 25, 100],
   };
 
-  @Input() itemSize = 25;
+  @Input()
+  itemSize = 25;
 
-  @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
+  @ViewChild('inputFilterFocus')
+  inputFilterFocus: ElementRef;
 
-  @ViewChild('headerDiv') headerDiv: ElementRef;
+  @ViewChild('headerDiv')
+  headerDiv: ElementRef;
 
-  @ViewChild(MatPaginator) paginatorDiv: MatPaginator;
+  @ViewChild(MatPaginator)
+  paginatorDiv: MatPaginator;
 
-  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport)
+  viewport: CdkVirtualScrollViewport;
 
-  @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
+  @Input()
+  dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
-  @Input() filterPlaceholder = 'Filter';
+  @Input()
+  filterPlaceholder = 'Filter';
 
-  @Input() dataSetEmptyPlaceholder = 'Data is empty';
+  @Input()
+  dataSetEmptyPlaceholder = 'Data is empty';
 
-  @Input() config: VirtualTableConfig;
+  @Input()
+  config: VirtualTableConfig;
 
-  @Input() onRowClick: (item: VirtualTableItem) => void;
+  @Input()
+  onRowClick: (item: VirtualTableItem) => void;
 
   public filterControl: FormControl = new FormControl('');
 
@@ -101,18 +113,19 @@ export class VirtualTableComponent {
 
   private effectChanged$ = new Subject<void>();
 
-  @HostBinding('class.with-header') public showHeader = true;
+  @HostBinding('class.with-header')
+  public showHeader = true;
 
-  @HostBinding('class.with-pagination') public showPaginator = false;
+  @HostBinding('class.with-pagination')
+  public showPaginator = false;
 
-  private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY)
-    .pipe(
-      debounceTime(350),
-      startWith(null),
-      tap((v) => v && v.length && this.paginatorDiv && this.paginatorDiv.firstPage()),
-      distinctUntilChanged(),
-      takeUntil(this._destroyed$),
-    );
+  private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY).pipe(
+    debounceTime(350),
+    startWith(null),
+    tap(v => v && v.length && this.paginatorDiv && this.paginatorDiv.firstPage()),
+    distinctUntilChanged(),
+    takeUntil(this._destroyed$),
+  );
 
   private _sort$: Observable<string> = this.sort$.asObservable().pipe(takeUntil(this._destroyed$));
 
@@ -120,13 +133,11 @@ export class VirtualTableComponent {
 
   private pageChange$: Subject<VirtualPageChange> = new Subject<VirtualPageChange>();
 
-  private pageChangeObs$: Observable<VirtualPageChange> = this.pageChange$
-    .asObservable()
-    .pipe(
-      startWith(null),
-      tap(() => this.viewport && this.viewport.scrollToIndex(0)),
-      takeUntil(this._destroyed$),
-    );
+  private pageChangeObs$: Observable<VirtualPageChange> = this.pageChange$.asObservable().pipe(
+    startWith(null),
+    tap(() => this.viewport && this.viewport.scrollToIndex(0)),
+    takeUntil(this._destroyed$),
+  );
 
   private dataSourceSub$: Subscription;
 
@@ -189,21 +200,21 @@ export class VirtualTableComponent {
       this._sort$.pipe(startWith(this._sortAfterConfigWasSet())),
       this.filter$,
       this.pageChangeObs$.pipe(
-        map((e) => ({
+        map(e => ({
           pageSize: (e && e.pageSize) || this.paginationPageSize,
           pageIndex: (e && e.pageIndex) || 0,
         })),
       ),
     ).pipe(
-      map(([stream, sort, filter, pageChange]) => {
-        const effect = this.createEffect(sort, filter, pageChange);
+      map(([stream, sort, filterStr, pageChange]) => {
+        const effect = this.createEffect(sort, filterStr, pageChange);
         this.effectChanged$.next();
         return {
           stream,
           effects: effect,
         };
       }),
-      switchMap((streamWithEffect) => {
+      switchMap(streamWithEffect => {
         if (this.serverSideStrategy) {
           return this.serverSideStrategyObs(streamWithEffect);
         }
@@ -222,13 +233,13 @@ export class VirtualTableComponent {
       )
       .subscribe((stream: Array<VirtualTableItem>) => {
         const setOfColumn = new Set();
-        stream.forEach((e) => Object.keys(e).forEach((key) => setOfColumn.add(key)));
+        stream.forEach(e => Object.keys(e).forEach(key => setOfColumn.add(key)));
         const autoColumnArray = Array.from(setOfColumn);
         this.column = this.createColumnFromArray(autoColumnArray);
         this.cdr.detectChanges();
       });
 
-    this.dataSourceSub$ = this._dataStream.pipe(takeUntil(this._destroyed$)).subscribe((stream) => {
+    this.dataSourceSub$ = this._dataStream.pipe(takeUntil(this._destroyed$)).subscribe(stream => {
       if (this.dataArray === null) {
         if (this.showHeader) {
           this.columnResizeAction();
@@ -246,7 +257,12 @@ export class VirtualTableComponent {
     }
 
     if (this.serverSideStrategy) {
-      this.applyDatasource(EMPTY.pipe(startWith([]), takeUntil(this._destroyed$)));
+      this.applyDatasource(
+        EMPTY.pipe(
+          startWith([]),
+          takeUntil(this._destroyed$),
+        ),
+      );
       return;
     }
 
@@ -265,11 +281,11 @@ export class VirtualTableComponent {
     }
     const obs = this._config.serverSideResolver(streamWithEffect.effects);
     return obs.pipe(
-      tap((response) => {
+      tap(response => {
         this.showLoading = false;
         this.sliceSize = response.totalSize;
       }),
-      map((response) => response.stream),
+      map(response => response.stream),
       takeUntil(this.effectChanged$),
     );
   }
@@ -281,11 +297,11 @@ export class VirtualTableComponent {
       observer.next(streamWithEffect);
       observer.complete();
     }).pipe(
-      map((streamWithEffect) => this.sortingStream(streamWithEffect)),
-      map((streamWithEffect) => this.filterStream(streamWithEffect)),
-      tap((stream) => (this.sliceSize = streamWithEffect.stream.length)),
-      map((streamWithEffect) => this.applyPagination(streamWithEffect)),
-      map((streamWithEffect) => streamWithEffect.stream),
+      map(streamWithEffects => this.sortingStream(streamWithEffects)),
+      map(streamWithEffects => this.filterStream(streamWithEffects)),
+      tap(streamWithEffects => (this.sliceSize = streamWithEffects.stream.length)),
+      map(streamWithEffects => this.applyPagination(streamWithEffects)),
+      map(streamWithEffects => streamWithEffects.stream),
     );
 
     return obs;
@@ -293,12 +309,12 @@ export class VirtualTableComponent {
 
   private createEffect(
     sort: string,
-    filter: string,
+    filterStr: string,
     pageChange: VirtualPageChange,
   ): VirtualTableEffect {
     let sortEffect;
     let pagginationEffect;
-    const columForSort = this.column.find((e) => e.key === sort);
+    const columForSort = this.column.find(e => e.key === sort);
     if (!this.showPaginator) {
       pagginationEffect = undefined;
     } else {
@@ -313,7 +329,7 @@ export class VirtualTableComponent {
       };
     }
     return {
-      filter,
+      filter: filterStr,
       sort: sortEffect,
       pagination: pagginationEffect,
     };
@@ -329,7 +345,7 @@ export class VirtualTableComponent {
       };
     }
 
-    const sortColumn = this.column.find((e) => e.key === sort.sortColumn);
+    const sortColumn = this.column.find(e => e.key === sort.sortColumn);
 
     if (!sortColumn) {
       return {
@@ -381,7 +397,7 @@ export class VirtualTableComponent {
 
     const filterSliceStream = stream.filter((item: VirtualTableItem) =>
       this.column.some(
-        (e) =>
+        e =>
           this.service
             .getElement(item, e.func)
             .toString()
@@ -417,7 +433,7 @@ export class VirtualTableComponent {
   }
 
   public _sortAfterConfigWasSet() {
-    const columnPreSort = this.column.find((e) => e.sort && e.sort !== null);
+    const columnPreSort = this.column.find(e => e.sort && e.sort !== null);
     if (columnPreSort) {
       return columnPreSort.key;
     }
@@ -429,7 +445,7 @@ export class VirtualTableComponent {
   ): Array<VirtualTableColumnInternal> {
     const columnArr = this.service.createColumnFromArray(arr);
     const set = new Set();
-    columnArr.forEach((column) => {
+    columnArr.forEach(column => {
       if (set.has(column.key)) {
         throw Error(`Column key=${column.key} already declare`);
       } else {

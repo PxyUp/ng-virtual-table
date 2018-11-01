@@ -1,3 +1,4 @@
+/* tslint:disable */
 import { VirtualTableComponent } from './virtual-table.component';
 import { ComponentFixture, async, TestBed, tick, fakeAsync, flush } from '@angular/core/testing';
 import { NgVirtualTableService } from '../services/ngVirtualTable.service';
@@ -24,7 +25,7 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
   let i = this._viewContainerRef.length;
   while (i--) {
-    let view = this._viewContainerRef.get(i) as EmbeddedViewRef<CdkVirtualForOfContext<any>>;
+    const view = this._viewContainerRef.get(i) as EmbeddedViewRef<CdkVirtualForOfContext<any>>;
     if (!view.destroyed) {
       view.context.index = this._renderedRange.start + i;
       view.context.count = count;
@@ -49,96 +50,103 @@ describe('VirtualTableComponent', () => {
   let component: VirtualTableComponent;
   let debugEl: DebugElement;
   let service: NgVirtualTableService;
-  beforeEach(
-    async(() => {
-      TestBed.configureTestingModule({
-        imports: [
-          ReactiveFormsModule,
-          BrowserAnimationsModule,
-          MatIconModule,
-          MatFormFieldModule,
-          ScrollDispatchModule,
-          MatPaginatorModule,
-          MatProgressSpinnerModule,
-          DragDropModule,
-          DynamicModule.withComponents([]),
-        ],
-        declarations: [VirtualTableComponent],
-        providers: [NgVirtualTableService],
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        ReactiveFormsModule,
+        BrowserAnimationsModule,
+        MatIconModule,
+        MatFormFieldModule,
+        ScrollDispatchModule,
+        MatPaginatorModule,
+        MatProgressSpinnerModule,
+        DragDropModule,
+        DynamicModule.withComponents([]),
+      ],
+      declarations: [VirtualTableComponent],
+      providers: [NgVirtualTableService],
+    })
+      .overrideComponent(VirtualTableComponent, {
+        set: {
+          styleUrls: [],
+          // I assume you can do the same for templateUrl here
+        },
       })
-        .overrideComponent(VirtualTableComponent, {
-          set: {
-            styleUrls: [],
-            // I assume you can do the same for templateUrl here
-          },
-        })
-        .compileComponents();
+      .compileComponents();
 
-      fixture = TestBed.createComponent(VirtualTableComponent);
-      component = fixture.componentInstance;
-      debugEl = fixture.debugElement;
-      service = TestBed.get(NgVirtualTableService);
-      fixture.detectChanges();
-    }),
-  );
+    fixture = TestBed.createComponent(VirtualTableComponent);
+    component = fixture.componentInstance;
+    debugEl = fixture.debugElement;
+    service = TestBed.get(NgVirtualTableService);
+    fixture.detectChanges();
+  }));
 
   it('should exist', () => {
     expect(fixture).toBeTruthy();
   });
 
   describe('applyDatasource', () => {
-    it(
-      'should apply datasource',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          header: true,
-        };
+    it('should apply datasource', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        header: true,
+      };
 
-        const dataSource = of(
-          Array(1).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      const dataSource = of(
+        Array(1)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        const dataSource2 = of(
-          Array(3).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      const dataSource2 = of(
+        Array(3)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        tick(1);
-        const header = debugEl.query(By.css('.header'));
-        expect(header).not.toBe(null);
-        expect(
-          component.viewport.elementRef.nativeElement.querySelectorAll('.virtual-table-row').length,
-        ).toBe(1);
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      tick(1);
+      const header = debugEl.query(By.css('.header'));
+      expect(header).not.toBe(null);
+      expect(
+        component.viewport.elementRef.nativeElement.querySelectorAll('.virtual-table-row').length,
+      ).toBe(1);
 
-        component.applyDatasource(dataSource2);
-        finishInit(fixture);
+      component.applyDatasource(dataSource2);
+      finishInit(fixture);
 
-        const headerAfter = debugEl.query(By.css('.header'));
+      const headerAfter = debugEl.query(By.css('.header'));
 
-        expect(headerAfter).not.toBe(null);
-        expect(
-          component.viewport.elementRef.nativeElement.querySelectorAll('.virtual-table-row').length,
-        ).toBe(3);
-      }),
-    );
+      expect(headerAfter).not.toBe(null);
+      expect(
+        component.viewport.elementRef.nativeElement.querySelectorAll('.virtual-table-row').length,
+      ).toBe(3);
+    }));
   });
 
   describe('filtering', () => {
     it('should filter text by control', () => {
-      const dataSource = of(Array(5).fill(0).map((e, index) => index));
+      const dataSource = of(
+        Array(5)
+          .fill(0)
+          .map((e, index) => index),
+      );
 
       const config: VirtualTableConfig = {
         column: [
@@ -146,7 +154,7 @@ describe('VirtualTableComponent', () => {
             key: 'name',
             name: 'Full name',
             sort: null,
-            func: (e) => e,
+            func: e => e,
           },
         ],
       };
@@ -159,18 +167,18 @@ describe('VirtualTableComponent', () => {
         dataSource: new SimpleChange(null, component.dataSource, false),
       });
       const pipe = component._dataStream.pipe(skip(1));
-      const sub = pipe.subscribe((value) => {
+      const sub = pipe.subscribe(value => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });
       sub.unsubscribe();
 
       component.filterControl.setValue('0');
-      const sub1 = pipe.subscribe((value) => {
+      const sub1 = pipe.subscribe(value => {
         expect(value).toEqual([0]);
       });
       sub1.unsubscribe();
       component.filterControl.setValue('01');
-      const sub2 = pipe.subscribe((value) => {
+      const sub2 = pipe.subscribe(value => {
         expect(value).toEqual([]);
       });
       sub2.unsubscribe();
@@ -183,7 +191,11 @@ describe('VirtualTableComponent', () => {
     let dataSource: Observable<Array<number>>;
     let config: VirtualTableConfig;
     beforeEach(() => {
-      dataSource = of(Array(5).fill(0).map((e, index) => index));
+      dataSource = of(
+        Array(5)
+          .fill(0)
+          .map((e, index) => index),
+      );
 
       config = {
         column: [
@@ -191,7 +203,7 @@ describe('VirtualTableComponent', () => {
             name: 'Full Name',
             key: 'age2',
             sort: null,
-            func: (e) => e,
+            func: e => e,
           },
         ],
       };
@@ -235,98 +247,89 @@ describe('VirtualTableComponent', () => {
         } as any,
       } as any;
     });
-    it(
-      'should not set _oldWidth',
-      fakeAsync(() => {
-        component.config = config;
-        component.dataSource = dataSource;
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        component.resizingEvent(event, column);
-        expect(component._oldWidth).toBe(null);
-      }),
-    );
+    it('should not set _oldWidth', fakeAsync(() => {
+      component.config = config;
+      component.dataSource = dataSource;
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      component.resizingEvent(event, column);
+      expect(component._oldWidth).toBe(null);
+    }));
 
-    it(
-      'should reset grabber',
-      fakeAsync(() => {
-        component.config = config;
-        component.dataSource = dataSource;
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
+    it('should reset grabber', fakeAsync(() => {
+      component.config = config;
+      component.dataSource = dataSource;
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
 
-        component.resizingEvent(event, column);
-        expect(event.source.element.nativeElement.style.transform).toBe('none');
-      }),
-    );
+      component.resizingEvent(event, column);
+      expect(event.source.element.nativeElement.style.transform).toBe('none');
+    }));
 
-    it(
-      'should set new column',
-      fakeAsync(() => {
-        event = {
-          pointerPosition: {
-            x: 268,
-            y: 0,
+    it('should set new column', fakeAsync(() => {
+      event = {
+        pointerPosition: {
+          x: 268,
+          y: 0,
+        },
+        source: {
+          element: {
+            nativeElement: {
+              style: {
+                transform: false,
+              },
+              getBoundingClientRect: () => {
+                return {
+                  width: 20,
+                  height: 20,
+                  x: 0,
+                  y: 0,
+                  bottom: 0,
+                  top: 0,
+                  right: 0,
+                  left: 0,
+                };
+              },
+            } as any,
           },
-          source: {
-            element: {
-              nativeElement: {
-                style: {
-                  transform: false,
-                },
-                getBoundingClientRect: () => {
-                  return {
-                    width: 20,
-                    height: 20,
-                    x: 0,
-                    y: 0,
-                    bottom: 0,
-                    top: 0,
-                    right: 0,
-                    left: 0,
-                  };
-                },
-              } as any,
-            },
-          } as any,
-        } as any;
+        } as any,
+      } as any;
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        component._oldWidth = 120;
-        component.headerDiv = {
-          nativeElement: {
-            getBoundingClientRect: () => {
-              return {
-                width: 600,
-                height: 20,
-                x: 0,
-                y: 0,
-                bottom: 0,
-                top: 0,
-                right: 0,
-                left: 0,
-              };
-            },
-          } as any,
-        };
-        component.resizingEvent(event, column);
-        expect(column.width).toBe(268);
-        expect(component._oldWidth).toBe(268);
-      }),
-    );
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      component._oldWidth = 120;
+      component.headerDiv = {
+        nativeElement: {
+          getBoundingClientRect: () => {
+            return {
+              width: 600,
+              height: 20,
+              x: 0,
+              y: 0,
+              bottom: 0,
+              top: 0,
+              right: 0,
+              left: 0,
+            };
+          },
+        } as any,
+      };
+      component.resizingEvent(event, column);
+      expect(column.width).toBe(268);
+      expect(component._oldWidth).toBe(268);
+    }));
   });
 
   describe('showHeader', () => {
@@ -483,7 +486,9 @@ describe('VirtualTableComponent', () => {
         },
       });
 
-      const stream1 = Array(10000).fill(0).map((e) => 5);
+      const stream1 = Array(10000)
+        .fill(0)
+        .map(e => 5);
 
       expect(
         component.applyPagination({
@@ -651,7 +656,7 @@ describe('VirtualTableComponent', () => {
         {
           name: 'Full Name',
           key: 'age',
-          func: (e) => e.age,
+          func: e => e.age,
         },
       ];
       expect(
@@ -683,7 +688,7 @@ describe('VirtualTableComponent', () => {
         {
           name: 'Full Name',
           key: 'age',
-          func: (e) => e.age,
+          func: e => e.age,
           comp: service.defaultComparator,
           sort: null as sortColumn,
         },
@@ -715,7 +720,7 @@ describe('VirtualTableComponent', () => {
         {
           name: 'Full Name',
           key: 'name',
-          func: (e) => e,
+          func: e => e,
           comp: service.defaultComparator,
           sort: null as sortColumn,
         },
@@ -865,842 +870,840 @@ describe('VirtualTableComponent', () => {
   });
 
   describe('applyConfig', () => {
-    it(
-      'should execute serverSideStrategyObs',
-      fakeAsync(() => {
-        const fn = (eff: any) => {
-          const mock = Observable.create((o) => {
-            o.next({
-              stream: [1, 2, 3],
-              totalSize: 3,
-            });
-            o.complete();
-          }).pipe(delay(1000));
-          return mock;
-        };
-
-        const config: VirtualTableConfig = {
-          header: false,
-          serverSide: true,
-          serverSideResolver: fn,
-          pagination: true,
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-        };
-
-        component.config = config;
-        (component as any).serverSideStrategyObs = jest.fn((e) => of([1, 2, 3]));
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-        });
-        fixture.detectChanges();
-        tick(1);
-        expect((component as any).serverSideStrategyObs).toBeCalled();
-      }),
-    );
-
-    it(
-      'should serverSideStrategyObs throw error',
-      fakeAsync(() => {
-        const fn = (eff: any) => {
-          const mock = Observable.create((o) => {
-            o.next({
-              stream: [1, 2, 3],
-              totalSize: 3,
-            });
-            o.complete();
-          }).pipe(delay(1000));
-          return mock;
-        };
-
-        const config: VirtualTableConfig = {
-          header: false,
-          serverSide: true,
-          //serverSideResolver: mock,
-          pagination: true,
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-        };
-
-        component.config = config;
-        try {
-          component.ngOnChanges({
-            config: new SimpleChange(null, component.config, false),
+    it('should execute serverSideStrategyObs', fakeAsync(() => {
+      const fn = (eff: any) => {
+        const mock = Observable.create(o => {
+          o.next({
+            stream: [1, 2, 3],
+            totalSize: 3,
           });
-          fixture.detectChanges();
-          tick(1);
-        } catch (e) {
-          expect(e.message).toBe('You use serverSide, serverSideResolver must be exist!');
-        }
-      }),
-    );
+          o.complete();
+        }).pipe(delay(1000));
+        return mock;
+      };
 
-    it(
-      'should serverSideStrategyObs apply params',
-      fakeAsync(() => {
-        const fn = (eff: any) => {
-          const mock = Observable.create((o) => {
-            o.next({
-              stream: [1, 2, 3],
-              totalSize: 3,
-            });
-            o.complete();
-          }).pipe(delay(1000));
-          return mock;
-        };
+      const config: VirtualTableConfig = {
+        header: false,
+        serverSide: true,
+        serverSideResolver: fn,
+        pagination: true,
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
+          },
+        ],
+      };
 
-        const config: VirtualTableConfig = {
-          header: false,
-          serverSide: true,
-          serverSideResolver: fn,
-          pagination: true,
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-        };
+      component.config = config;
+      (component as any).serverSideStrategyObs = jest.fn(e => of([1, 2, 3]));
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+      });
+      fixture.detectChanges();
+      tick(1);
+      expect((component as any).serverSideStrategyObs).toBeCalled();
+    }));
 
-        component.config = config;
+    it('should serverSideStrategyObs throw error', fakeAsync(() => {
+      const fn = (eff: any) => {
+        const mock = Observable.create(o => {
+          o.next({
+            stream: [1, 2, 3],
+            totalSize: 3,
+          });
+          o.complete();
+        }).pipe(delay(1000));
+        return mock;
+      };
+
+      const config: VirtualTableConfig = {
+        header: false,
+        serverSide: true,
+        // serverSideResolver: mock,
+        pagination: true,
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
+          },
+        ],
+      };
+
+      component.config = config;
+      try {
         component.ngOnChanges({
           config: new SimpleChange(null, component.config, false),
         });
         fixture.detectChanges();
         tick(1);
-        expect(component.showLoading).toBe(true);
-        tick(1000);
-        expect(component.showLoading).toBe(false);
-        expect(component.sliceSize).toBe(3);
-      }),
-    );
+      } catch (e) {
+        expect(e.message).toBe('You use serverSide, serverSideResolver must be exist!');
+      }
+    }));
 
-    it(
-      'should apply config with paginator',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          header: false,
-          pagination: true,
-        };
+    it('should serverSideStrategyObs apply params', fakeAsync(() => {
+      const fn = (eff: any) => {
+        const mock = Observable.create(o => {
+          o.next({
+            stream: [1, 2, 3],
+            totalSize: 3,
+          });
+          o.complete();
+        }).pipe(delay(1000));
+        return mock;
+      };
 
-        const config2: VirtualTableConfig = {
-          header: true,
-          pagination: false,
-        };
+      const config: VirtualTableConfig = {
+        header: false,
+        serverSide: true,
+        serverSideResolver: fn,
+        pagination: true,
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
+          },
+        ],
+      };
 
-        const dataSource = of(
-          Array(100).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      component.config = config;
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+      });
+      fixture.detectChanges();
+      tick(1);
+      expect(component.showLoading).toBe(true);
+      tick(1000);
+      expect(component.showLoading).toBe(false);
+      expect(component.sliceSize).toBe(3);
+    }));
+
+    it('should apply config with paginator', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        header: false,
+        pagination: true,
+      };
+
+      const config2: VirtualTableConfig = {
+        header: true,
+        pagination: false,
+      };
+
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        tick(1);
+      component.config = config;
+      component.dataSource = dataSource;
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      tick(1);
 
-        const header = debugEl.query(By.css('.header'));
-        const paginator = debugEl.query(By.css('.virtual-table-bottom'));
+      const header = debugEl.query(By.css('.header'));
+      const paginator = debugEl.query(By.css('.virtual-table-bottom'));
 
-        expect(component.showPaginator).toBe(true);
+      expect(component.showPaginator).toBe(true);
 
-        expect(paginator).not.toBe(null);
+      expect(paginator).not.toBe(null);
 
-        expect(header).toBe(null);
-        const spy2 = jest.spyOn(component.paginatorDiv, 'firstPage');
-        component.applyConfig(config2);
-        fixture.detectChanges();
+      expect(header).toBe(null);
+      const spy2 = jest.spyOn(component.paginatorDiv, 'firstPage');
+      component.applyConfig(config2);
+      fixture.detectChanges();
 
-        const headerAfter = debugEl.query(By.css('.header'));
-        const paginatorAfter = debugEl.query(By.css('.virtual-table-bottom'));
-        expect(headerAfter).not.toBe(null);
-        expect(component.showPaginator).toBe(false);
-        expect(spy2).not.toBeCalled();
-        expect(paginatorAfter).toBe(null);
-        component.applyConfig(config);
-        fixture.detectChanges();
-        const spy3 = jest.spyOn(component.paginatorDiv, 'firstPage');
-        component.applyConfig(config);
-        fixture.detectChanges();
-        expect(spy3).toBeCalled();
-      }),
-    );
+      const headerAfter = debugEl.query(By.css('.header'));
+      const paginatorAfter = debugEl.query(By.css('.virtual-table-bottom'));
+      expect(headerAfter).not.toBe(null);
+      expect(component.showPaginator).toBe(false);
+      expect(spy2).not.toBeCalled();
+      expect(paginatorAfter).toBe(null);
+      component.applyConfig(config);
+      fixture.detectChanges();
+      const spy3 = jest.spyOn(component.paginatorDiv, 'firstPage');
+      component.applyConfig(config);
+      fixture.detectChanges();
+      expect(spy3).toBeCalled();
+    }));
 
-    it(
-      'should apply config',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          header: false,
-        };
+    it('should apply config', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        header: false,
+      };
 
-        const config2: VirtualTableConfig = {
-          header: true,
-        };
+      const config2: VirtualTableConfig = {
+        header: true,
+      };
 
-        const dataSource = of(
-          Array(100).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        tick(1);
-        const header = debugEl.query(By.css('.header'));
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      tick(1);
+      const header = debugEl.query(By.css('.header'));
 
-        expect(header).toBe(null);
+      expect(header).toBe(null);
 
-        component.applyConfig(config2);
-        fixture.detectChanges();
+      component.applyConfig(config2);
+      fixture.detectChanges();
 
-        const headerAfter = debugEl.query(By.css('.header'));
+      const headerAfter = debugEl.query(By.css('.header'));
 
-        expect(headerAfter).not.toBe(null);
-      }),
-    );
+      expect(headerAfter).not.toBe(null);
+    }));
   });
 
   describe('Set pagination settings', () => {
-    it(
-      'should set custom pagination settings',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-          pagination: {
-            pageSizeOptions: [1, 88, 132],
-          },
-        };
-
-        const dataSource = of([
+    it('should set custom pagination settings', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 44,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
+        ],
+        pagination: {
+          pageSizeOptions: [1, 88, 132],
+        },
+      };
+
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      expect(component.paginationPageSize).toBe(component.defaultPaginationSetting.pageSize);
+      expect(component.paginationPageOptions).toEqual([1, 88, 132]);
+    }));
+
+    it('should set custom pagination settings', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 23,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
+        ],
+        pagination: {
+          pageSize: 88,
+        },
+      };
+
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      expect(component.paginationPageSize).toBe(88);
+      expect(component.paginationPageOptions).toBe(
+        component.defaultPaginationSetting.pageSizeOptions,
+      );
+    }));
+
+    it('should set pagination default settings', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 2,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
-        ]);
+        ],
+        pagination: true,
+      };
 
-        component.config = config;
-        component.dataSource = dataSource;
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        expect(component.paginationPageSize).toBe(component.defaultPaginationSetting.pageSize);
-        expect(component.paginationPageOptions).toEqual([1, 88, 132]);
-      }),
-    );
+      component.config = config;
+      component.dataSource = dataSource;
 
-    it(
-      'should set custom pagination settings',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-          pagination: {
-            pageSize: 88,
-          },
-        };
-
-        const dataSource = of([
-          {
-            age: 44,
-          },
-          {
-            age: 23,
-          },
-          {
-            age: 2,
-          },
-        ]);
-
-        component.config = config;
-        component.dataSource = dataSource;
-
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        expect(component.paginationPageSize).toBe(88);
-        expect(component.paginationPageOptions).toBe(
-          component.defaultPaginationSetting.pageSizeOptions,
-        );
-      }),
-    );
-
-    it(
-      'should set pagination default settings',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-          pagination: true,
-        };
-
-        const dataSource = of([
-          {
-            age: 44,
-          },
-          {
-            age: 23,
-          },
-          {
-            age: 2,
-          },
-        ]);
-
-        component.config = config;
-        component.dataSource = dataSource;
-
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        expect(component.paginationPageSize).toBe(component.defaultPaginationSetting.pageSize);
-        expect(component.paginationPageOptions).toBe(
-          component.defaultPaginationSetting.pageSizeOptions,
-        );
-      }),
-    );
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      expect(component.paginationPageSize).toBe(component.defaultPaginationSetting.pageSize);
+      expect(component.paginationPageOptions).toBe(
+        component.defaultPaginationSetting.pageSizeOptions,
+      );
+    }));
   });
 
   describe('Template', () => {
-    it(
-      'should not render paginator by default',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-        };
-
-        const dataSource = of([
+    it('should not render paginator by default', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 44,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
+        ],
+      };
+
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const item = debugEl.query(By.css('.virtual-table-bottom'));
+      expect(item).toBe(null);
+      expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(false);
+    }));
+
+    it('should not render paginator', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 23,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
+        ],
+        pagination: false,
+      };
+
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const item = debugEl.query(By.css('.virtual-table-bottom'));
+      expect(item).toBe(null);
+      expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(false);
+    }));
+
+    it('should render paginator', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 2,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
-        ]);
+        ],
+        pagination: true,
+      };
 
-        component.config = config;
-        component.dataSource = dataSource;
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const item = debugEl.query(By.css('.virtual-table-bottom'));
-        expect(item).toBe(null);
-        expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(false);
-      }),
-    );
+      component.config = config;
+      component.dataSource = dataSource;
 
-    it(
-      'should not render paginator',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-          pagination: false,
-        };
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const item = debugEl.query(By.css('.virtual-table-bottom'));
+      expect(item).not.toBe(null);
+      expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(true);
+    }));
 
-        const dataSource = of([
+    it('should presort `ASC` item in table content ', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 44,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
+        ],
+      };
+
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const items = component.viewport.elementRef.nativeElement.querySelectorAll(
+        '.virtual-table-column',
+      );
+      expect(items.length).toBe(3);
+
+      const itemsVal = Array.from(items).map(i => i.textContent);
+
+      expect(itemsVal).toEqual(['2', '23', '44']);
+    }));
+
+    it('should presort `DESC` item in table content ', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 23,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'desc',
+            func: e => e.age,
           },
+        ],
+      };
+
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const items = component.viewport.elementRef.nativeElement.querySelectorAll(
+        '.virtual-table-column',
+      );
+      expect(items.length).toBe(3);
+
+      const itemsVal = Array.from(items).map(i => i.textContent);
+
+      expect(itemsVal).toEqual(['44', '23', '2']);
+    }));
+
+    it('should resorted after click presort `ASC` item in table content ', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
           {
-            age: 2,
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+            sort: 'asc',
+            func: e => e.age,
           },
-        ]);
+        ],
+      };
 
-        component.config = config;
-        component.dataSource = dataSource;
+      const dataSource = of([
+        {
+          age: 44,
+        },
+        {
+          age: 23,
+        },
+        {
+          age: 2,
+        },
+      ]);
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const item = debugEl.query(By.css('.virtual-table-bottom'));
-        expect(item).toBe(null);
-        expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(false);
-      }),
-    );
+      component.config = config;
+      component.dataSource = dataSource;
 
-    it(
-      'should render paginator',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-          pagination: true,
-        };
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const items = component.viewport.elementRef.nativeElement.querySelectorAll(
+        '.virtual-table-column',
+      );
+      expect(items.length).toBe(3);
 
-        const dataSource = of([
-          {
-            age: 44,
-          },
-          {
-            age: 23,
-          },
-          {
-            age: 2,
-          },
-        ]);
+      const itemsVal = Array.from(items).map(i => i.textContent);
 
-        component.config = config;
-        component.dataSource = dataSource;
+      expect(itemsVal).toEqual(['2', '23', '44']);
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const item = debugEl.query(By.css('.virtual-table-bottom'));
-        expect(item).not.toBe(null);
-        expect(debugEl.nativeElement.classList.contains('with-pagination')).toBe(true);
-      }),
-    );
+      const headerItem = debugEl.query(By.css('.header-item'));
+      headerItem.nativeElement.click();
+      finishInit(fixture);
 
-    it(
-      'should presort `ASC` item in table content ',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-        };
+      const itemsAfterClick = component.viewport.elementRef.nativeElement.querySelectorAll(
+        '.virtual-table-column',
+      );
+      expect(itemsAfterClick.length).toBe(3);
 
-        const dataSource = of([
-          {
-            age: 44,
-          },
-          {
-            age: 23,
-          },
-          {
-            age: 2,
-          },
-        ]);
+      const itemsAfterClickVal = Array.from(itemsAfterClick).map(i => i.textContent);
 
-        component.config = config;
-        component.dataSource = dataSource;
+      expect(itemsAfterClickVal).toEqual(['44', '23', '2']);
+    }));
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const items = component.viewport.elementRef.nativeElement.querySelectorAll(
-          '.virtual-table-column',
-        );
-        expect(items.length).toBe(3);
+    it('should not show header', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        header: false,
+      };
 
-        const itemsVal = Array.from(items).map((i) => i.textContent);
-
-        expect(itemsVal).toEqual([' 2 ', ' 23 ', ' 44 ']);
-      }),
-    );
-
-    it(
-      'should presort `DESC` item in table content ',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'desc',
-              func: (e) => e.age,
-            },
-          ],
-        };
-
-        const dataSource = of([
-          {
-            age: 44,
-          },
-          {
-            age: 23,
-          },
-          {
-            age: 2,
-          },
-        ]);
-
-        component.config = config;
-        component.dataSource = dataSource;
-
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const items = component.viewport.elementRef.nativeElement.querySelectorAll(
-          '.virtual-table-column',
-        );
-        expect(items.length).toBe(3);
-
-        const itemsVal = Array.from(items).map((i) => i.textContent);
-
-        expect(itemsVal).toEqual([' 44 ', ' 23 ', ' 2 ']);
-      }),
-    );
-
-    it(
-      'should resorted after click presort `ASC` item in table content ',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-              sort: 'asc',
-              func: (e) => e.age,
-            },
-          ],
-        };
-
-        const dataSource = of([
-          {
-            age: 44,
-          },
-          {
-            age: 23,
-          },
-          {
-            age: 2,
-          },
-        ]);
-
-        component.config = config;
-        component.dataSource = dataSource;
-
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const items = component.viewport.elementRef.nativeElement.querySelectorAll(
-          '.virtual-table-column',
-        );
-        expect(items.length).toBe(3);
-
-        const itemsVal = Array.from(items).map((i) => i.textContent);
-
-        expect(itemsVal).toEqual([' 2 ', ' 23 ', ' 44 ']);
-
-        const headerItem = debugEl.query(By.css('.header-item'));
-        headerItem.nativeElement.click();
-        finishInit(fixture);
-
-        const itemsAfterClick = component.viewport.elementRef.nativeElement.querySelectorAll(
-          '.virtual-table-column',
-        );
-        expect(itemsAfterClick.length).toBe(3);
-
-        const itemsAfterClickVal = Array.from(itemsAfterClick).map((i) => i.textContent);
-
-        expect(itemsAfterClickVal).toEqual([' 44 ', ' 23 ', ' 2 ']);
-      }),
-    );
-
-    it(
-      'should not show header',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          header: false,
-        };
-
-        const dataSource = of(
-          Array(100).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
 
-        const header = debugEl.query(By.css('.header'));
+      const header = debugEl.query(By.css('.header'));
 
-        expect(header).toBe(null);
-      }),
-    );
+      expect(header).toBe(null);
+    }));
 
-    it(
-      'should show header',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {};
+    it('should show header', fakeAsync(() => {
+      const config: VirtualTableConfig = {};
 
-        const dataSource = of(
-          Array(100).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        const header = debugEl.query(By.css('.header'));
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      const header = debugEl.query(By.css('.header'));
 
-        expect(header).not.toBe(null);
-      }),
-    );
+      expect(header).not.toBe(null);
+    }));
 
-    it(
-      'should apply sort for header',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {};
+    it('should apply sort for header', fakeAsync(() => {
+      const config: VirtualTableConfig = {};
 
-        const dataSource = of(
-          Array(100).fill(0).map((e) => ({
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
 
-        debugEl.query(By.css('.header-item')).nativeElement.click();
-        fixture.detectChanges();
-        expect(debugEl.query(By.css('.header-item.asc'))).not.toBe(null);
-        debugEl.query(By.css('.header-item')).nativeElement.click();
-        fixture.detectChanges();
-        expect(debugEl.query(By.css('.header-item.desc'))).not.toBe(null);
-        debugEl.query(By.css('.header-item')).nativeElement.click();
-        fixture.detectChanges();
-        expect(debugEl.query(By.css('.header-item'))).not.toBe(null);
-        expect(debugEl.query(By.css('.header-item.desc'))).toBe(null);
-        expect(debugEl.query(By.css('.header-item.asc'))).toBe(null);
-      }),
-    );
+      debugEl.query(By.css('.header-item')).nativeElement.click();
+      fixture.detectChanges();
+      expect(debugEl.query(By.css('.header-item.asc'))).not.toBe(null);
+      debugEl.query(By.css('.header-item')).nativeElement.click();
+      fixture.detectChanges();
+      expect(debugEl.query(By.css('.header-item.desc'))).not.toBe(null);
+      debugEl.query(By.css('.header-item')).nativeElement.click();
+      fixture.detectChanges();
+      expect(debugEl.query(By.css('.header-item'))).not.toBe(null);
+      expect(debugEl.query(By.css('.header-item.desc'))).toBe(null);
+      expect(debugEl.query(By.css('.header-item.asc'))).toBe(null);
+    }));
 
-    it(
-      'should not show filter',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {};
+    it('should not show filter', fakeAsync(() => {
+      const config: VirtualTableConfig = {};
 
-        const dataSource = of(
-          Array(100).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
             age: Math.round(Math.random() * 1000),
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
 
-        const filter = debugEl.query(By.css('.filter-spot'));
+      const filter = debugEl.query(By.css('.filter-spot'));
 
-        expect(filter).toBe(null);
-      }),
-    );
+      expect(filter).toBe(null);
+    }));
 
-    it(
-      'should render item by default `func',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              resizable: false,
-            },
-          ],
-        };
+    it('should render item by default `func`', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            resizable: false,
+          },
+        ],
+      };
 
-        const dataSource = of(
-          Array(1).fill(0).map((e) => ({
+      const dataSource = of(
+        Array(1)
+          .fill(0)
+          .map(e => ({
             name: 'test',
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const items = component.viewport.elementRef.nativeElement.querySelectorAll(
-          '.virtual-table-column',
-        );
-        expect(items.length).toBe(1);
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const items = component.viewport.elementRef.nativeElement.querySelectorAll(
+        '.virtual-table-column',
+      );
+      expect(items.length).toBe(1);
 
-        expect(items[0].textContent).toBe(' test ');
-      }),
-    );
+      expect(items[0].textContent).toBe('test');
+    }));
 
-    it(
-      'should render item provided `func',
-      fakeAsync(() => {
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              func: (e: any) => e.label,
-              resizable: false,
-            },
-          ],
-        };
+    it('should render item provided `func', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            func: (e: any) => e.label,
+            resizable: false,
+          },
+        ],
+      };
 
-        const dataSource = of(
-          Array(1).fill(0).map((e) => ({
+      const dataSource = of(
+        Array(1)
+          .fill(0)
+          .map(e => ({
             name: 'test',
             label: 'test2',
           })),
-        );
+      );
 
-        component.config = config;
-        component.dataSource = dataSource;
+      component.config = config;
+      component.dataSource = dataSource;
 
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        finishInit(fixture);
-        const items = component.viewport.elementRef.nativeElement.querySelectorAll(
-          '.virtual-table-column',
-        );
-        expect(items.length).toBe(1);
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      finishInit(fixture);
+      const items = component.viewport.elementRef.nativeElement.querySelectorAll(
+        '.virtual-table-column',
+      );
+      expect(items.length).toBe(1);
 
-        expect(items[0].textContent).toBe(' test2 ');
-      }),
-    );
+      expect(items[0].textContent).toBe('test2');
+    }));
 
-    it(
-      'should show filter',
-      fakeAsync(() => {
+    it('should show filter', fakeAsync(() => {
+      const config: VirtualTableConfig = {
+        filter: true,
+      };
+
+      const dataSource = of(
+        Array(100)
+          .fill(0)
+          .map(e => ({
+            name: Math.random()
+              .toString(36)
+              .substring(7),
+            age: Math.round(Math.random() * 1000),
+          })),
+      );
+
+      component.config = config;
+      component.dataSource = dataSource;
+
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      const filter = debugEl.query(By.css('.filter-spot'));
+
+      expect(filter).not.toBe(null);
+    }));
+
+    describe('toggleFilter', () => {
+      it('should show filter', fakeAsync(() => {
         const config: VirtualTableConfig = {
           filter: true,
         };
 
         const dataSource = of(
-          Array(100).fill(0).map((e) => ({
-            name: Math.random().toString(36).substring(7),
-            age: Math.round(Math.random() * 1000),
-          })),
+          Array(100)
+            .fill(0)
+            .map(e => ({
+              name: Math.random()
+                .toString(36)
+                .substring(7),
+              age: Math.round(Math.random() * 1000),
+            })),
         );
 
         component.config = config;
@@ -1711,44 +1714,14 @@ describe('VirtualTableComponent', () => {
           dataSource: new SimpleChange(null, component.dataSource, false),
         });
         fixture.detectChanges();
-        const filter = debugEl.query(By.css('.filter-spot'));
-
-        expect(filter).not.toBe(null);
-      }),
-    );
-
-    describe('toggleFilter', () => {
-      it(
-        'should show filter',
-        fakeAsync(() => {
-          const config: VirtualTableConfig = {
-            filter: true,
-          };
-
-          const dataSource = of(
-            Array(100).fill(0).map((e) => ({
-              name: Math.random().toString(36).substring(7),
-              age: Math.round(Math.random() * 1000),
-            })),
-          );
-
-          component.config = config;
-          component.dataSource = dataSource;
-
-          component.ngOnChanges({
-            config: new SimpleChange(null, component.config, false),
-            dataSource: new SimpleChange(null, component.dataSource, false),
-          });
-          fixture.detectChanges();
-          debugEl.query(By.css('.filter-spot mat-icon')).nativeElement.click();
-          fixture.detectChanges();
-          expect(debugEl.query(By.css('.filter-spot.open'))).not.toBe(null);
-          debugEl.query(By.css('.filter-spot mat-icon')).nativeElement.click();
-          tick(350);
-          fixture.detectChanges();
-          expect(debugEl.query(By.css('.filter-spot.open'))).toBe(null);
-        }),
-      );
+        debugEl.query(By.css('.filter-spot mat-icon')).nativeElement.click();
+        fixture.detectChanges();
+        expect(debugEl.query(By.css('.filter-spot.open'))).not.toBe(null);
+        debugEl.query(By.css('.filter-spot mat-icon')).nativeElement.click();
+        tick(350);
+        fixture.detectChanges();
+        expect(debugEl.query(By.css('.filter-spot.open'))).toBe(null);
+      }));
     });
   });
 
@@ -1773,19 +1746,19 @@ describe('VirtualTableComponent', () => {
           key: 'name1',
           name: 'Full name',
           sort: null,
-          func: (e) => e,
+          func: e => e,
         },
         {
           key: 'name2',
           name: 'Full name',
           sort: null,
-          func: (e) => e,
+          func: e => e,
         },
         {
           key: 'name3',
           name: 'Full name',
           sort: null,
-          func: (e) => e,
+          func: e => e,
         },
       ];
 
@@ -1848,67 +1821,12 @@ describe('VirtualTableComponent', () => {
   });
 
   describe('columnResizeAction', () => {
-    it(
-      'should resize after datasource was set',
-      fakeAsync(() => {
-        const dataSource = of(Array(5).fill(0).map((e, index) => index));
-
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              sort: null,
-              func: (e) => e,
-            },
-          ],
-        };
-
-        component.config = config;
-        component.dataSource = dataSource;
-        (component as any).columnResizeAction = jest.fn();
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        expect((component as any).columnResizeAction).toBeCalled();
-      }),
-    );
-
-    it(
-      'should not resize after datasource was set',
-      fakeAsync(() => {
-        const dataSource = of(Array(5).fill(0).map((e, index) => index));
-
-        const config: VirtualTableConfig = {
-          column: [
-            {
-              key: 'name',
-              name: 'Full name',
-              sort: null,
-              func: (e) => e,
-            },
-          ],
-          header: false,
-        };
-
-        component.config = config;
-        component.dataSource = dataSource;
-        (component as any).columnResizeAction = jest.fn();
-        component.ngOnChanges({
-          config: new SimpleChange(null, component.config, false),
-          dataSource: new SimpleChange(null, component.dataSource, false),
-        });
-        fixture.detectChanges();
-        expect((component as any).columnResizeAction).not.toBeCalled();
-      }),
-    );
-  });
-
-  describe('applySort', () => {
-    it('should apply sort for column', () => {
-      const dataSource = of(Array(5).fill(0).map((e, index) => index));
+    it('should resize after datasource was set', fakeAsync(() => {
+      const dataSource = of(
+        Array(5)
+          .fill(0)
+          .map((e, index) => index),
+      );
 
       const config: VirtualTableConfig = {
         column: [
@@ -1916,7 +1834,68 @@ describe('VirtualTableComponent', () => {
             key: 'name',
             name: 'Full name',
             sort: null,
-            func: (e) => e,
+            func: e => e,
+          },
+        ],
+      };
+
+      component.config = config;
+      component.dataSource = dataSource;
+      (component as any).columnResizeAction = jest.fn();
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      expect((component as any).columnResizeAction).toBeCalled();
+    }));
+
+    it('should not resize after datasource was set', fakeAsync(() => {
+      const dataSource = of(
+        Array(5)
+          .fill(0)
+          .map((e, index) => index),
+      );
+
+      const config: VirtualTableConfig = {
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            sort: null,
+            func: e => e,
+          },
+        ],
+        header: false,
+      };
+
+      component.config = config;
+      component.dataSource = dataSource;
+      (component as any).columnResizeAction = jest.fn();
+      component.ngOnChanges({
+        config: new SimpleChange(null, component.config, false),
+        dataSource: new SimpleChange(null, component.dataSource, false),
+      });
+      fixture.detectChanges();
+      expect((component as any).columnResizeAction).not.toBeCalled();
+    }));
+  });
+
+  describe('applySort', () => {
+    it('should apply sort for column', () => {
+      const dataSource = of(
+        Array(5)
+          .fill(0)
+          .map((e, index) => index),
+      );
+
+      const config: VirtualTableConfig = {
+        column: [
+          {
+            key: 'name',
+            name: 'Full name',
+            sort: null,
+            func: e => e,
           },
         ],
       };
@@ -1929,23 +1908,23 @@ describe('VirtualTableComponent', () => {
         dataSource: new SimpleChange(null, component.dataSource, false),
       });
 
-      const sub = component._dataStream.subscribe((value) => {
+      const sub = component._dataStream.subscribe(value => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });
       sub.unsubscribe();
       component.applySort('name');
-      const sub2 = component._dataStream.subscribe((value) => {
+      const sub2 = component._dataStream.subscribe(value => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });
       sub2.unsubscribe();
       component.applySort('name');
 
-      const sub3 = component._dataStream.subscribe((value) => {
+      const sub3 = component._dataStream.subscribe(value => {
         expect(value).toEqual([4, 3, 2, 1, 0]);
       });
       sub3.unsubscribe();
       component.applySort('name');
-      const sub4 = component._dataStream.subscribe((value) => {
+      const sub4 = component._dataStream.subscribe(value => {
         expect(value).toEqual([0, 1, 2, 3, 4]);
       });
       sub4.unsubscribe();
@@ -1958,7 +1937,7 @@ describe('VirtualTableComponent', () => {
         name: 5,
       };
 
-      expect(component.getElement(item, (e) => e.name)).toBe(5);
+      expect(component.getElement(item, e => e.name)).toBe(5);
 
       const item2 = {
         name: 5,
@@ -1971,8 +1950,8 @@ describe('VirtualTableComponent', () => {
         },
       };
 
-      expect(component.getElement(item, (e) => e.name)).toBe(5);
-      expect(component.getElement(item2, (e) => e.label.test.test.test)).toBe('name');
+      expect(component.getElement(item, e => e.name)).toBe(5);
+      expect(component.getElement(item2, e => e.label.test.test.test)).toBe('name');
     });
   });
 
@@ -1984,7 +1963,7 @@ describe('VirtualTableComponent', () => {
             key: 'name',
             name: 'Full name',
             sort: null,
-            func: (e) => e,
+            func: e => e,
           },
         ],
       };
@@ -2001,7 +1980,7 @@ describe('VirtualTableComponent', () => {
             key: 'name',
             name: 'Full name',
             sort: 'asc',
-            func: (e) => e,
+            func: e => e,
           },
         ],
       };
@@ -2052,7 +2031,7 @@ describe('VirtualTableComponent', () => {
             key: 'name',
             name: 'Full name',
             sort: 'asc',
-            func: (e) => e,
+            func: e => e,
           },
         ],
       };
@@ -2069,13 +2048,13 @@ describe('VirtualTableComponent', () => {
             key: 'name',
             name: 'Full name',
             sort: 'asc',
-            func: (e) => e,
+            func: e => e,
           },
           {
             key: 'name',
             name: 'Full name',
             sort: 'asc',
-            func: (e) => e,
+            func: e => e,
           },
         ],
       };

@@ -384,6 +384,12 @@ export class VirtualTableComponent implements OnChanges, OnDestroy {
     };
   }
 
+  /**
+   * @todo Implement filterForEach column on clientSide
+   * @body Filter must be filtering each column like in config
+   */
+  public filteringByEachColumnString(streamWithEffect: StreamWithEffect): StreamWithEffect {}
+
   public filterStream(streamWithEffect: StreamWithEffect): StreamWithEffect {
     const stream = streamWithEffect.stream;
     const filterStr = streamWithEffect.effects && streamWithEffect.effects.filter;

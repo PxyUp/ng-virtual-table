@@ -10,6 +10,7 @@ export type sortColumn = 'asc' | 'desc' | null | false;
 export interface VirtualTableColumn {
   name?: string;
   key: string;
+  filter?: VirtualColumnFilter | boolean;
   func?: (item: VirtualTableItem) => any;
   comp?: (a: any, b: any) => number;
   sort?: sortColumn;
@@ -56,6 +57,7 @@ export interface StreamWithEffect {
 
 export interface VirtualTableEffect {
   filter?: string;
+  columnFilters?: Array<VirtualColumnFilter>;
   sort?: VirtualSortEffect;
   pagination?: VirtualPageChange;
 }
@@ -68,4 +70,15 @@ export interface VirtualPageChange {
 export interface VirtualSortEffect {
   sortColumn: string;
   sortType?: sortColumn;
+}
+
+export interface VirtualColumnFilter {
+  filterType?: string;
+  filterValue?: string;
+  filterValues?: Array<KeyValueFilter>;
+}
+
+export interface KeyValueFilter {
+  key: string;
+  value: string;
 }

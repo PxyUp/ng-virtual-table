@@ -43,12 +43,12 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
     DynamicModule.withComponents([]),
   ],
   exports: [VirtualTableComponent],
-  providers: [NgVirtualTableService],
 })
 export class NgVirtualTableModule {
   public static forRoot(): ModuleWithProviders {
     return {
       ngModule: NgVirtualTableModule,
+      providers: [NgVirtualTableService],
     };
   }
 }

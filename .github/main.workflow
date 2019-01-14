@@ -25,5 +25,7 @@ action "Publish" {
   needs = "Master"
   uses = "actions/npm@master"
   args = "publish dist --access public"
-  secrets = ["NPM_AUTH_TOKEN"]
+  secrets = [
+    "NPM_PUBLISH",
+  ]
 }

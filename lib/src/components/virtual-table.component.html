@@ -24,8 +24,7 @@
       cdkDrag
       (cdkDragEnded)="headerItemDragFinished()"
       (cdkDragStarted)="headerItemDragStarted()"
-      (mousedown)="!headerItem.draggable && mouseDownBlock($event)"
-      (touchstart)="!headerItem.draggable && mouseDownBlock($event)"
+      [cdkDragDisabled]="!headerItem.draggable"
     >
       <div class="title">
         <div *ngIf="headerItem.draggable" class="drag-order-handle">

@@ -1991,16 +1991,6 @@ describe('VirtualTableComponent', () => {
     });
   });
 
-  describe('mouseDownBlock', () => {
-    it('should execute on event', () => {
-      const ev = {
-        stopImmediatePropagation: jest.fn(),
-      } as any;
-      component.mouseDownBlock(ev);
-      expect(ev.stopImmediatePropagation).toBeCalled();
-    });
-  });
-
   describe('clickItem', () => {
     it('should execute func', () => {
       const item = {

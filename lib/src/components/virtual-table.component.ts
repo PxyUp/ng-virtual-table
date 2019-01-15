@@ -33,7 +33,6 @@ import {
   StreamWithEffect,
   VirtualTablePaginator,
   VirtualPageChange,
-  ResponseStreamWithSize,
   VirtualTableEffect,
 } from '../interfaces';
 import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -71,35 +70,25 @@ export class VirtualTableComponent implements OnChanges, OnDestroy {
     pageSizeOptions: [5, 10, 25, 100],
   };
 
-  @Input()
-  itemSize = 25;
+  @Input() itemSize = 25;
 
-  @ViewChild('inputFilterFocus')
-  inputFilterFocus: ElementRef;
+  @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
 
-  @ViewChild('headerDiv')
-  headerDiv: ElementRef;
+  @ViewChild('headerDiv') headerDiv: ElementRef;
 
-  @ViewChild(MatPaginator)
-  paginatorDiv: MatPaginator;
+  @ViewChild(MatPaginator) paginatorDiv: MatPaginator;
 
-  @ViewChild(CdkVirtualScrollViewport)
-  viewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
 
-  @Input()
-  dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
+  @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
-  @Input()
-  filterPlaceholder = 'Filter';
+  @Input() filterPlaceholder = 'Filter';
 
-  @Input()
-  dataSetEmptyPlaceholder = 'Data is empty';
+  @Input() dataSetEmptyPlaceholder = 'Data is empty';
 
-  @Input()
-  config: VirtualTableConfig;
+  @Input() config: VirtualTableConfig;
 
-  @Input()
-  onRowClick: (item: VirtualTableItem) => void;
+  @Input() onRowClick: (item: VirtualTableItem) => void;
 
   public filterControl: FormControl = new FormControl('');
 
@@ -113,11 +102,9 @@ export class VirtualTableComponent implements OnChanges, OnDestroy {
 
   private effectChanged$ = new Subject<void>();
 
-  @HostBinding('class.with-header')
-  public showHeader = true;
+  @HostBinding('class.with-header') public showHeader = true;
 
-  @HostBinding('class.with-pagination')
-  public showPaginator = false;
+  @HostBinding('class.with-pagination') public showPaginator = false;
 
   private filter$ = ((this.filterControl && this.filterControl.valueChanges) || EMPTY).pipe(
     debounceTime(350),
@@ -532,10 +519,6 @@ export class VirtualTableComponent implements OnChanges, OnDestroy {
 
   transformDynamicInput(input: Object, item: VirtualTableItem) {
     return this.service.transformDynamicInput(input, item);
-  }
-
-  mouseDownBlock(event: MouseEvent) {
-    event.stopImmediatePropagation();
   }
 
   onPageChange(event: PageEvent) {

@@ -21,7 +21,7 @@ Make sure you have:
 ```typescript
 import { NgVirtualTableModule } from 'ng-virtual-table';
 
-imports: [NgVirtualTableModule.forRoot()],
+imports: [NgVirtualTableModule],
 ```
 
 ```html

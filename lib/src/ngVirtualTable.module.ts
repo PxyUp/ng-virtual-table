@@ -1,17 +1,18 @@
-import { NgModule, ModuleWithProviders, EmbeddedViewRef } from '@angular/core';
+import { CdkVirtualForOf, CdkVirtualForOfContext, ScrollingModule } from '@angular/cdk/scrolling';
+import { EmbeddedViewRef, ModuleWithProviders, NgModule } from '@angular/core';
+
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { DynamicModule } from 'ng-dynamic-component';
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ScrollingModule, CdkVirtualForOf, CdkVirtualForOfContext } from '@angular/cdk/scrolling';
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { VirtualTableComponent } from './components/virtual-table.component';
-import { ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { DynamicModule } from 'ng-dynamic-component';
 import { NgVirtualTableService } from './services/ngVirtualTable.service';
-import { LayoutModule } from '@angular/cdk/layout';
+import { ReactiveFormsModule } from '@angular/forms';
+import { VirtualTableComponent } from './components/virtual-table.component';
 
 CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   const count = this._data.length;
@@ -32,7 +33,6 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    BrowserAnimationsModule,
     MatIconModule,
     MatFormFieldModule,
     ScrollingModule,
@@ -44,11 +44,4 @@ CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
   ],
   exports: [VirtualTableComponent],
 })
-export class NgVirtualTableModule {
-  public static forRoot(): ModuleWithProviders {
-    return {
-      ngModule: NgVirtualTableModule,
-      providers: [NgVirtualTableService],
-    };
-  }
-}
+export class NgVirtualTableModule {}

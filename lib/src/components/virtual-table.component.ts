@@ -1,44 +1,45 @@
+import { CdkDragDrop, CdkDragMove, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
-  Component,
   ChangeDetectionStrategy,
-  Input,
-  SimpleChanges,
-  ViewChild,
-  ElementRef,
   ChangeDetectorRef,
+  Component,
+  ElementRef,
   HostBinding,
+  Input,
   OnChanges,
   OnDestroy,
+  SimpleChanges,
+  ViewChild,
 } from '@angular/core';
-import { Observable, EMPTY, Subject, combineLatest, Subscription, zip, Observer, of } from 'rxjs';
+import { EMPTY, Observable, Observer, Subject, Subscription, combineLatest } from 'rxjs';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import {
-  map,
-  startWith,
-  debounceTime,
-  distinctUntilChanged,
-  takeUntil,
-  publishBehavior,
-  refCount,
-  take,
-  filter,
-  tap,
-  switchMap,
-} from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
-import {
-  VirtualTableConfig,
-  VirtualTableItem,
+  StreamWithEffect,
+  VirtualPageChange,
   VirtualTableColumn,
   VirtualTableColumnInternal,
-  StreamWithEffect,
-  VirtualTablePaginator,
-  VirtualPageChange,
+  VirtualTableConfig,
   VirtualTableEffect,
+  VirtualTableItem,
+  VirtualTablePaginator,
 } from '../interfaces';
-import { CdkDragMove, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { NgVirtualTableService } from '../services/ngVirtualTable.service';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  publishBehavior,
+  refCount,
+  startWith,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
+
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { FormControl } from '@angular/forms';
+import { NgVirtualTableService } from '../services/ngVirtualTable.service';
 
 @Component({
   selector: 'ng-virtual-table',
@@ -72,13 +73,13 @@ export class VirtualTableComponent implements OnChanges, OnDestroy {
 
   @Input() itemSize = 25;
 
-  @ViewChild('inputFilterFocus') inputFilterFocus: ElementRef;
+  @ViewChild('inputFilterFocus', { static: false }) inputFilterFocus: ElementRef;
 
-  @ViewChild('headerDiv') headerDiv: ElementRef;
+  @ViewChild('headerDiv', { static: false }) headerDiv: ElementRef;
 
-  @ViewChild(MatPaginator) paginatorDiv: MatPaginator;
+  @ViewChild(MatPaginator, { static: false }) paginatorDiv: MatPaginator;
 
-  @ViewChild(CdkVirtualScrollViewport) viewport: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport, { static: false }) viewport: CdkVirtualScrollViewport;
 
   @Input() dataSource: Observable<Array<VirtualTableItem | number | string | boolean>>;
 
@@ -221,7 +222,7 @@ export class VirtualTableComponent implements OnChanges, OnDestroy {
       .subscribe((stream: Array<VirtualTableItem>) => {
         const setOfColumn = new Set();
         stream.forEach(e => Object.keys(e).forEach(key => setOfColumn.add(key)));
-        const autoColumnArray = Array.from(setOfColumn);
+        const autoColumnArray = Array.from(setOfColumn) as any;
         this.column = this.createColumnFromArray(autoColumnArray);
         this.cdr.detectChanges();
       });

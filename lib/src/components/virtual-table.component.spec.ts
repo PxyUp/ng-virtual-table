@@ -1,39 +1,27 @@
+import { CdkDragDrop, CdkDragMove, DragDropModule } from '@angular/cdk/drag-drop';
+import { ComponentFixture, TestBed, async, fakeAsync, flush, tick } from '@angular/core/testing';
+import { DebugElement, EmbeddedViewRef, SimpleChange } from '@angular/core';
+import { Observable, Observer, of } from 'rxjs';
+import {
+  ResponseStreamWithSize,
+  VirtualTableColumnInternal,
+  VirtualTableConfig,
+  sortColumn,
+} from '../interfaces';
+import { delay, skip } from 'rxjs/operators';
+
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { By } from '@angular/platform-browser';
+import { DynamicModule } from 'ng-dynamic-component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgVirtualTableService } from '../services/ngVirtualTable.service';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ScrollDispatchModule } from '@angular/cdk/scrolling';
 /* tslint:disable */
 import { VirtualTableComponent } from './virtual-table.component';
-import { ComponentFixture, async, TestBed, tick, fakeAsync, flush } from '@angular/core/testing';
-import { NgVirtualTableService } from '../services/ngVirtualTable.service';
-import { MatIconModule } from '@angular/material/icon';
-import { ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {
-  ScrollDispatchModule,
-  CdkVirtualForOf,
-  CdkVirtualForOfContext,
-} from '@angular/cdk/scrolling';
-import { DragDropModule, CdkDragDrop, CdkDragMove } from '@angular/cdk/drag-drop';
-import { DynamicModule } from 'ng-dynamic-component';
-import { VirtualTableConfig, VirtualTableColumnInternal, sortColumn } from '../interfaces';
-import { of, Observable, Observer } from 'rxjs';
-import { By } from '@angular/platform-browser';
-import { SimpleChange, DebugElement, EmbeddedViewRef } from '@angular/core';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { skip, delay } from 'rxjs/operators';
-
-CdkVirtualForOf.prototype['_updateContext'] = function(this: any) {
-  const count = this._data.length;
-  let i = this._viewContainerRef.length;
-  while (i--) {
-    const view = this._viewContainerRef.get(i) as EmbeddedViewRef<CdkVirtualForOfContext<any>>;
-    if (!view.destroyed) {
-      view.context.index = this._renderedRange.start + i;
-      view.context.count = count;
-      this._updateComputedContextProperties(view.context);
-      view.detectChanges();
-    }
-  }
-};
 
 function finishInit(fixture: ComponentFixture<any>) {
   // On the first cycle we render and measure the viewport.
@@ -872,7 +860,7 @@ describe('VirtualTableComponent', () => {
   describe('applyConfig', () => {
     it('should execute serverSideStrategyObs', fakeAsync(() => {
       const fn = (eff: any) => {
-        const mock = Observable.create(o => {
+        const mock = Observable.create((o: Observer<ResponseStreamWithSize>) => {
           o.next({
             stream: [1, 2, 3],
             totalSize: 3,
@@ -910,7 +898,7 @@ describe('VirtualTableComponent', () => {
 
     it('should serverSideStrategyObs throw error', fakeAsync(() => {
       const fn = (eff: any) => {
-        const mock = Observable.create(o => {
+        const mock = Observable.create((o: Observer<ResponseStreamWithSize>) => {
           o.next({
             stream: [1, 2, 3],
             totalSize: 3,
@@ -950,7 +938,7 @@ describe('VirtualTableComponent', () => {
 
     it('should serverSideStrategyObs apply params', fakeAsync(() => {
       const fn = (eff: any) => {
-        const mock = Observable.create(o => {
+        const mock = Observable.create((o: Observer<ResponseStreamWithSize>) => {
           o.next({
             stream: [1, 2, 3],
             totalSize: 3,
@@ -988,7 +976,7 @@ describe('VirtualTableComponent', () => {
       expect(component.sliceSize).toBe(3);
     }));
 
-    it('should apply config with paginator', fakeAsync(() => {
+    it('should apply config with paginator', () => {
       const config: VirtualTableConfig = {
         header: false,
         pagination: true,
@@ -1017,7 +1005,6 @@ describe('VirtualTableComponent', () => {
         dataSource: new SimpleChange(null, component.dataSource, false),
       });
       fixture.detectChanges();
-      tick(1);
 
       const header = debugEl.query(By.css('.header'));
       const paginator = debugEl.query(By.css('.virtual-table-bottom'));
@@ -1043,9 +1030,9 @@ describe('VirtualTableComponent', () => {
       component.applyConfig(config);
       fixture.detectChanges();
       expect(spy3).toBeCalled();
-    }));
+    });
 
-    it('should apply config', fakeAsync(() => {
+    it('should apply config', () => {
       const config: VirtualTableConfig = {
         header: false,
       };
@@ -1073,7 +1060,7 @@ describe('VirtualTableComponent', () => {
         dataSource: new SimpleChange(null, component.dataSource, false),
       });
       fixture.detectChanges();
-      tick(1);
+
       const header = debugEl.query(By.css('.header'));
 
       expect(header).toBe(null);
@@ -1084,7 +1071,7 @@ describe('VirtualTableComponent', () => {
       const headerAfter = debugEl.query(By.css('.header'));
 
       expect(headerAfter).not.toBe(null);
-    }));
+    });
   });
 
   describe('Set pagination settings', () => {
